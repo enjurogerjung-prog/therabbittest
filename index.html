@@ -1,0 +1,4643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Rabbit Test</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital@1&family=VT323&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Deep, sophisticated dark palette */
+            --bg-primary: #0f1114;
+            --bg-secondary: #161a1e;
+            --bg-elevated: #1c2127;
+            
+            /* Text hierarchy - warm off-whites */
+            --text-bright: #f5f0e8;
+            --text-primary: #d4cfc4;
+            --text-secondary: #9a958a;
+            --text-dim: #5c584f;
+            --text-hero: #ffffff;
+            --text-muted: #6b6860;
+            --text-ghost: #4a4740;
+            
+            /* CHARACTER COLORS - Warm (V's World - Love, Hope, Family) */
+            --rabbit: #ffb4a2;            /* Soft warm rose - Rabbit early (hopeful) */
+            --rabbit-mid: #e07a6a;        /* Darker rose - Rabbit middle (worried) */
+            --rabbit-dark: #c94a3a;       /* Deep red - Rabbit late (doomed) */
+            --rabbit-dead: #8b0000;       /* Kill red - Rabbit final (same as terminated) */
+            --owen: #f4d19b;              /* Warm golden honey - Owen (warmth, innocence) */
+            --vincent: #f0a500;           /* Amber - Vincent's voice (same as forbidden text) */
+            --catherine: #e85d5d;         /* Coral - Catherine (same as warning/danger) */
+            --jokeguy: #b39ddb;           /* Dusty purple - the dirty joke guy */
+            
+            /* CHARACTER COLORS - Cold (System/Antagonist) */
+            --system-white: #ffffff;      /* Pure white - the facility, the system woman */
+            --system-green: #00d4aa;      /* System green - facility tech */
+            --system-cold: #c8e6c9;       /* Pale sickly green-white - cold system voice */
+            
+            /* Accent: Amber/Gold for forbidden content */
+            --amber: #f0a500;
+            --amber-bright: #ffc233;
+            --amber-deep: #c78800;
+            --amber-glow: rgba(240, 165, 0, 0.25);
+            --amber-subtle: rgba(240, 165, 0, 0.08);
+            
+            /* Accent: Cyan/Teal for system - cold and clinical */
+            --green: #00d4aa;
+            --green-bright: #33ffcc;
+            --green-glow: rgba(0, 212, 170, 0.2);
+            
+            /* Accent: Warm coral for warnings/danger */
+            --coral: #e85d5d;
+            --coral-glow: rgba(232, 93, 93, 0.15);
+            
+            /* Structural */
+            --border: #2a2f35;
+            --border-light: #3d434a;
+        }
+
+        /* Character color classes */
+        .c-rabbit { color: var(--rabbit); }
+        .c-rabbit-mid { color: var(--rabbit-mid); }
+        .c-rabbit-dark { color: var(--rabbit-dark); }
+        .c-rabbit-dead { color: var(--rabbit-dead); }
+        .c-catherine { color: var(--catherine); }
+        .c-owen { color: var(--owen); }
+        .c-vincent { color: var(--vincent); }
+        .c-jokeguy { color: var(--jokeguy); }
+        .c-system { color: var(--system-green); }
+        .c-ice { 
+            color: var(--system-white); 
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+        .c-facility { color: var(--system-white); }
+        .c-emphasis { color: var(--text-bright); font-weight: 400; }
+        .c-cold { color: var(--system-cold); }
+        .c-warm { color: var(--amber-bright); }
+        .c-terminated { color: #8b0000; font-weight: bold; }
+        .c-crossed { 
+            text-decoration: line-through; 
+            opacity: 0.6;
+            position: relative;
+        }
+        
+        .c-crossed::before,
+        .c-crossed::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: currentColor;
+        }
+        
+        .c-crossed::before {
+            top: 30%;
+            transform: rotate(-2deg);
+        }
+        
+        .c-crossed::after {
+            top: 70%;
+            transform: rotate(1deg);
+        }
+        .c-correction {
+            color: var(--text-primary);
+            font-style: italic;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        @media (min-width: 768px) {
+            html {
+                font-size: 17px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            html {
+                font-size: 18px;
+            }
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            92% { opacity: 1; }
+            93% { opacity: 0.97; }
+            94% { opacity: 1; }
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            line-height: 1.85;
+            min-height: 100vh;
+            overflow-x: hidden;
+            animation: flicker 12s infinite;
+            -webkit-font-smoothing: antialiased;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* Subtle noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.015;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+            z-index: 9999;
+        }
+
+        /* Minimal scanlines */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 2px,
+                rgba(0, 0, 0, 0.03) 2px,
+                rgba(0, 0, 0, 0.03) 3px
+            );
+            z-index: 9998;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .page-content {
+            padding: 24px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .page-content {
+                padding: 48px 40px;
+                max-width: 680px;
+            }
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* ============ TIMER BAR ============ */
+        .timer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+            font-family: 'VT323', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: none;
+            justify-content: space-between;
+            z-index: 1000;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .timer.visible {
+            display: flex;
+        }
+
+        .score-display {
+            color: #ffffff;
+            font-weight: 400;
+        }
+
+        .timer-spacer {
+            height: 50px;
+            display: none;
+        }
+
+        .timer-spacer.visible {
+            display: block;
+        }
+
+        /* ============ TITLE PAGE ============ */
+        .title-page {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 48px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Make everything on title page white except Owen's name */
+        .title-page * {
+            color: #ffffff !important;
+        }
+        
+        .title-page .c-owen {
+            color: var(--owen) !important;
+        }
+
+        /* Corner accents */
+        .title-page::before,
+        .title-page::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 1px solid var(--border);
+            opacity: 0.4;
+        }
+
+        .title-page::before {
+            top: 32px;
+            left: 32px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .title-page::after {
+            bottom: 32px;
+            right: 32px;
+            border-left: none;
+            border-top: none;
+        }
+
+        @keyframes bootIn {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .title-logo {
+            font-family: 'VT323', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: var(--text-dim);
+            opacity: 0;
+            margin-bottom: 36px;
+            text-transform: uppercase;
+            animation: bootIn 0.6s ease 0.2s forwards;
+        }
+
+        @media (min-width: 480px) {
+            .title-logo {
+                letter-spacing: 6px;
+                margin-bottom: 48px;
+            }
+        }
+
+        @keyframes titleColorShift {
+            0% { color: var(--rabbit); }
+            50% { color: var(--text-bright); }
+            100% { color: var(--system-green); }
+        }
+
+        @keyframes rabbitHint {
+            0%, 70% { color: inherit; }
+            85% { color: var(--rabbit); }
+            100% { color: #ffffff; }
+        }
+
+        .title-rabbit {
+            animation: rabbitHint 6s ease 2s forwards;
+        }
+
+        .title-main {
+            font-family: 'VT323', monospace;
+            font-size: 2.2rem;
+            font-weight: 400;
+            letter-spacing: 4px;
+            margin-bottom: 12px;
+            color: var(--system-green);
+            line-height: 1.2;
+            opacity: 0;
+            animation: bootIn 0.6s ease 0.4s forwards, titleColorShift 4s ease 1s forwards;
+        }
+
+        @media (min-width: 480px) {
+            .title-main {
+                font-size: 3rem;
+                letter-spacing: 8px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .title-main {
+                font-size: 3.8rem;
+                letter-spacing: 12px;
+            }
+        }
+
+        .title-sub {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            opacity: 0;
+            text-transform: uppercase;
+            animation: bootIn 0.6s ease 0.55s forwards;
+        }
+
+        @media (min-width: 480px) {
+            .title-sub {
+                font-size: 0.75rem;
+                letter-spacing: 8px;
+                margin-bottom: 56px;
+            }
+        }
+
+        .title-divider {
+            width: 1px;
+            height: 48px;
+            background: linear-gradient(180deg, transparent, var(--border-light), transparent);
+            margin: 0 auto 48px auto;
+            opacity: 0;
+            animation: bootIn 0.6s ease 0.65s forwards;
+        }
+
+        .title-meta {
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: bootIn 0.6s ease 0.75s forwards;
+        }
+
+        @media (min-width: 480px) {
+            .title-meta {
+                margin-bottom: 56px;
+            }
+        }
+
+        .title-form {
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        @media (min-width: 480px) {
+            .title-form {
+                font-size: 0.65rem;
+                letter-spacing: 3px;
+            }
+        }
+
+        .title-department {
+            font-size: 0.5rem;
+            color: var(--text-dim);
+            opacity: 0.6;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        @media (min-width: 480px) {
+            .title-department {
+                font-size: 0.6rem;
+                letter-spacing: 2px;
+            }
+        }
+
+        .title-timestamp {
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            opacity: 0.4;
+            margin-top: 12px;
+            letter-spacing: 1px;
+        }
+
+        .employee-id {
+            font-family: 'VT323', monospace;
+            font-size: 0.65rem;
+            color: var(--amber);
+            opacity: 0.5;
+            margin-top: 16px;
+            letter-spacing: 2px;
+        }
+
+        .title-begin {
+            display: inline-block;
+            padding: 16px 56px;
+            border: 1px solid var(--text-secondary);
+            background: transparent;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 6px;
+            color: var(--text-bright);
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: bootIn 0.6s ease 0.9s forwards;
+        }
+
+        .title-begin:hover {
+            border-color: var(--text-bright);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .title-warning {
+            position: absolute;
+            bottom: 24px;
+            left: 0;
+            right: 0;
+            font-family: 'VT323', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            color: var(--coral);
+            opacity: 0;
+            text-transform: uppercase;
+            animation: fadeUp 0.8s ease 1s forwards, blink 1.5s ease 1.8s infinite;
+        }
+
+        /* ============ INSTRUCTIONS ============ */
+        .instructions-page {
+            padding-bottom: 32px;
+            text-align: center;
+        }
+        
+        /* Make everything on instructions page white except amber example and c-warm text */
+        .instructions-page * {
+            color: #ffffff !important;
+        }
+        
+        /* Keep amber example in amber color */
+        .example-amber,
+        .example-amber * {
+            color: var(--amber-bright) !important;
+        }
+        
+        .example-header {
+            color: var(--amber) !important;
+        }
+        
+        /* Keep c-warm class in amber color */
+        .instructions-page .c-warm {
+            color: var(--amber-bright) !important;
+        }
+        
+        /* Keep c-system in green */
+        .instructions-page .c-system {
+            color: var(--system-green) !important;
+        }
+        
+        /* Keep c-cold styling */
+        .instructions-page .c-cold {
+            color: var(--system-cold) !important;
+        }
+        
+        /* Keep legal notice first letters in amber */
+        .legal-notice strong {
+            color: var(--amber-bright) !important;
+        }
+
+        .instructions-header {
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            font-family: 'VT323', monospace;
+            font-size: 0.75rem;
+            color: #ffffff;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 28px;
+            opacity: 0.7;
+        }
+
+        /* Clean protocol blocks like title page */
+        .protocol-block {
+            margin: 28px 0;
+        }
+
+        .protocol-title {
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+            padding: 12px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .protocol-body {
+            font-size: 0.85rem;
+            line-height: 2;
+            color: var(--text-primary);
+            text-align: center;
+            padding: 0 8px;
+        }
+
+        /* Key rule - amber highlight - cleaner */
+        .key-rule {
+            background: var(--amber-glow);
+            border: 1px solid var(--amber);
+            padding: 28px 20px;
+            margin: 32px 0;
+            text-align: center;
+        }
+
+        .key-rule-text {
+            font-family: 'VT323', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            color: var(--amber-bright);
+            line-height: 1.6;
+        }
+
+        .key-rule-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 12px;
+        }
+
+        .example-amber {
+            background: var(--amber-glow);
+            border: 1px solid var(--amber);
+            border-left: 3px solid var(--amber);
+            padding: 20px 16px;
+            margin: 24px 0;
+            color: var(--amber-bright);
+            font-size: 0.8rem;
+            line-height: 1.8;
+            text-align: left;
+        }
+
+        .example-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .example-header {
+            font-family: 'VT323', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        /* Hidden acrostic - cleaner */
+        .legal-notice {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin: 28px 0;
+            line-height: 2.2;
+            text-align: left;
+            padding: 20px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+        }
+
+        .legal-notice strong {
+            color: var(--amber-bright);
+            font-weight: 400;
+        }
+
+        /* Agreement - cleaner */
+        .agreement-box {
+            margin-top: 32px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            cursor: pointer;
+            margin-bottom: 20px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            transition: border-color 0.3s ease;
+            text-align: left;
+            user-select: none;
+        }
+
+        .checkbox-container:hover {
+            border-color: var(--border-light);
+        }
+
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border: 2px solid var(--text-dim);
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+            transition: all 0.2s ease;
+        }
+
+        .custom-checkbox.checked {
+            border-color: var(--amber);
+            background: var(--amber);
+        }
+
+        .custom-checkbox.checked::after {
+            content: '✓';
+            color: var(--bg-primary);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .checkbox-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            cursor: pointer;
+        }
+
+        .understand-btn {
+            width: 100%;
+            padding: 18px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+        }
+
+        .understand-btn.enabled {
+            cursor: pointer;
+            border-color: var(--text-secondary);
+            color: var(--text-bright);
+        }
+
+        .understand-btn.enabled:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--text-bright);
+        }
+
+        /* ============ WARNING BOX ============ */
+        .warning-box {
+            border-left: 2px solid var(--coral);
+            padding: 16px;
+            background: var(--coral-glow);
+            margin-bottom: 24px;
+        }
+
+        .warning-box h2 {
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            color: var(--coral);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .warning-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .warning-box li {
+            color: var(--coral);
+            margin-bottom: 6px;
+            padding-left: 16px;
+            position: relative;
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .warning-box li::before {
+            content: "›";
+            position: absolute;
+            left: 0;
+        }
+
+        /* ============ TEST SECTIONS ============ */
+        .test-section {
+            display: none;
+        }
+
+        .test-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress {
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+
+        .section-header {
+            font-family: 'VT323', monospace;
+            font-size: 0.75rem;
+            color: #ffffff;
+            text-align: center;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            opacity: 0.7;
+        }
+
+        .terminal-line {
+            font-family: 'VT323', monospace;
+            font-size: 0.7rem;
+            color: #ffffff;
+            text-align: center;
+            letter-spacing: 2px;
+            margin: 40px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        /* ============ QUESTIONS ============ */
+        .question-block {
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        @media (min-width: 480px) {
+            .question-block {
+                margin-bottom: 40px;
+                padding-bottom: 40px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .question-block {
+                margin-bottom: 48px;
+                padding-bottom: 48px;
+            }
+        }
+
+        .question-block:last-of-type {
+            border-bottom: none;
+        }
+
+        .question-number {
+            font-family: 'VT323', monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        @media (min-width: 480px) {
+            .question-number {
+                font-size: 0.75rem;
+                letter-spacing: 4px;
+                margin-bottom: 16px;
+            }
+        }
+
+        .question-text {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        @media (min-width: 480px) {
+            .question-text {
+                font-size: 0.95rem;
+                margin-bottom: 24px;
+                line-height: 1.9;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .question-text {
+                font-size: 1rem;
+            }
+        }
+
+        .options {
+            list-style: none;
+            padding: 0;
+        }
+
+        .options li {
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        @media (min-width: 480px) {
+            .options li {
+                padding: 16px 20px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .options li {
+                padding: 18px 24px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .options li:hover {
+            border-color: var(--border-light);
+            background: var(--bg-elevated);
+        }
+
+        .options li.selected {
+            border-color: var(--amber);
+            background: var(--amber-subtle);
+        }
+
+        .options li.locked {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .options li.locked.selected {
+            opacity: 1;
+        }
+
+        .options li.correct-answer {
+            border-color: var(--green) !important;
+            background: rgba(0, 212, 170, 0.08) !important;
+            color: var(--green) !important;
+            opacity: 1 !important;
+        }
+
+        .options li.wrong-answer {
+            border-color: var(--coral) !important;
+            background: var(--coral-glow) !important;
+            color: var(--coral) !important;
+            opacity: 0.5 !important;
+        }
+
+        .options li.wrong-answer.selected {
+            opacity: 1 !important;
+        }
+
+        /* ============ AMBER TEXT ============ */
+        @keyframes amberReveal {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .amber-text {
+            color: var(--amber);
+            padding: 32px 16px 28px 20px;
+            margin: 32px 0;
+            font-size: 0.85rem;
+            line-height: 2;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--amber);
+            position: relative;
+            animation: amberReveal 0.6s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .amber-text::after {
+            content: 'RESTRICTED';
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.45rem;
+            letter-spacing: 2px;
+            color: var(--amber-deep);
+        }
+
+        @media (min-width: 480px) {
+            .amber-text {
+                padding: 40px 24px 36px 28px;
+                margin: 40px 0;
+                font-size: 0.9rem;
+            }
+            
+            .amber-text::after {
+                left: 20px;
+                font-size: 0.5rem;
+                letter-spacing: 3px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .amber-text {
+                padding: 48px 36px 40px 40px;
+                margin: 48px 0;
+                font-size: 0.92rem;
+                line-height: 2.2;
+            }
+            
+            .amber-text::after {
+                left: 24px;
+                letter-spacing: 4px;
+            }
+        }
+
+        .admin-header {
+            font-family: 'VT323', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            opacity: 0.35;
+            color: var(--amber);
+        }
+
+        .filler-text {
+            font-size: 0.7rem;
+            opacity: 0.25;
+            line-height: 1.7;
+            color: var(--amber);
+            margin-bottom: 8px;
+        }
+
+        .hidden-message {
+            margin-top: 28px;
+            line-height: 2.2;
+            color: var(--amber-bright);
+        }
+
+        .hidden-message em {
+            opacity: 0.85;
+            font-style: italic;
+        }
+
+        .hidden-message strong {
+            color: var(--text-bright);
+            font-weight: 400;
+        }
+
+        .cutoff {
+            display: block;
+            margin-top: 28px;
+            opacity: 0.5;
+            color: var(--amber);
+            font-style: italic;
+        }
+
+        /* White fade effect for white room story - oscillates between original colors and white */
+        #whiteRoomStory.fading-to-white,
+        #whiteRoomStory.fading-to-white *,
+        #whiteRoomStory.fading-to-white .c-rabbit,
+        #whiteRoomStory.fading-to-white .c-rabbit-mid,
+        #whiteRoomStory.fading-to-white .c-rabbit-dark,
+        #whiteRoomStory.fading-to-white .c-owen,
+        #whiteRoomStory.fading-to-white .c-vincent,
+        #whiteRoomStory.fading-to-white .c-catherine,
+        #whiteRoomStory.fading-to-white .c-ice,
+        #whiteRoomStory.fading-to-white .c-cold,
+        #whiteRoomStory.fading-to-white .c-emphasis {
+            animation: oscillateToWhite 16s ease-in-out infinite;
+        }
+        
+        @keyframes oscillateToWhite {
+            0% {
+                color: inherit;
+            }
+            50% {
+                color: #ffffff;
+            }
+            100% {
+                color: inherit;
+            }
+        }
+
+        .lyrics {
+            display: block;
+            font-family: 'Crimson Text', Georgia, serif;
+            font-size: 1.4em;
+            font-style: italic;
+            color: var(--rabbit);
+            margin: 32px 0;
+            padding: 20px 0;
+            letter-spacing: 2px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 180, 162, 0.2);
+            border-bottom: 1px solid rgba(255, 180, 162, 0.2);
+            animation: lyricGlow 4s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255, 180, 162, 0.3);
+        }
+
+        @keyframes lyricGlow {
+            0%, 100% { 
+                text-shadow: 0 0 20px rgba(255, 180, 162, 0.3);
+                opacity: 0.9;
+            }
+            50% { 
+                text-shadow: 0 0 30px rgba(255, 180, 162, 0.5), 0 0 50px rgba(255, 180, 162, 0.2);
+                opacity: 1;
+            }
+        }
+
+        /* ============ GREEN TEXT ============ */
+        @keyframes greenPulse {
+            0%, 100% { border-left-color: var(--green); }
+            50% { border-left-color: var(--green-bright); }
+        }
+
+        .green-text {
+            color: var(--green);
+            padding: 32px 16px 28px 20px;
+            margin: 32px 0;
+            font-size: 0.85rem;
+            line-height: 2;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--green);
+            position: relative;
+            animation: amberReveal 0.6s ease, greenPulse 4s ease infinite;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .green-text::after {
+            content: 'SYSTEM';
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.45rem;
+            letter-spacing: 2px;
+            color: var(--green);
+        }
+
+        @media (min-width: 480px) {
+            .green-text {
+                padding: 40px 24px 36px 28px;
+                margin: 40px 0;
+                font-size: 0.9rem;
+            }
+            
+            .green-text::after {
+                left: 20px;
+                font-size: 0.5rem;
+                letter-spacing: 3px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .green-text {
+                padding: 48px 36px 40px 40px;
+                margin: 48px 0;
+                font-size: 0.92rem;
+                line-height: 2.2;
+            }
+            
+            .green-text::after {
+                left: 24px;
+                letter-spacing: 4px;
+            }
+        }
+
+        .green-text strong {
+            color: var(--text-hero);
+            font-weight: 400;
+        }
+
+        .green-text em {
+            color: var(--green-bright);
+            font-style: normal;
+        }
+
+        /* ============ GLITCH EFFECTS FOR GREEN TEXT ============ */
+        @keyframes glitchFlicker {
+            0%, 100% { opacity: 1; }
+            92% { opacity: 1; }
+            93% { opacity: 0.1; }
+            94% { opacity: 1; }
+            95% { opacity: 0.3; }
+            96% { opacity: 1; }
+        }
+
+        @keyframes scoreGlitch {
+            0%, 100% { transform: translateY(0); }
+            10% { transform: translateY(-2px); }
+            20% { transform: translateY(3px); }
+            30% { transform: translateY(-1px); }
+            40% { transform: translateY(2px); }
+            50% { transform: translateY(0); }
+        }
+
+        @keyframes textCorrupt {
+            0%, 100% { opacity: 1; color: var(--green); }
+            50% { opacity: 0.7; color: var(--coral); }
+        }
+
+        @keyframes letterHighlight {
+            0%, 100% { color: inherit; text-shadow: none; }
+            50% { color: var(--coral); text-shadow: 0 0 10px var(--coral); }
+        }
+
+        @keyframes bgFlash {
+            0%, 100% { background-color: var(--bg-primary); }
+            50% { background-color: #1a0a0a; }
+        }
+
+        /* Creepy red flicker for "read" text in final section - very slow, barely noticeable */
+        @keyframes deathFlicker {
+            0%, 94%, 100% { color: inherit; opacity: 1; }
+            95% { color: var(--rabbit-dead); opacity: 0.95; }
+            96% { color: inherit; opacity: 1; }
+        }
+
+        @keyframes subtleDeathFlicker {
+            0%, 92%, 100% { color: inherit; opacity: 1; }
+            93% { color: var(--rabbit-dead); opacity: 0.9; }
+            94% { color: inherit; opacity: 1; }
+        }
+
+        .death-flicker {
+            animation: subtleDeathFlicker 25s ease-in-out infinite;
+            animation-delay: var(--flicker-delay, 0s);
+        }
+
+        .death-flicker-fast {
+            animation: deathFlicker 0.3s ease-in-out;
+        }
+
+        /* Final section - minimal effects, just slow "you" turning red */
+        #test6 .progress {
+            /* No animation */
+        }
+
+        #test6 .section-header {
+            /* No animation */
+        }
+
+        #test6 .green-text {
+            /* No distortion effects */
+        }
+
+        /* No static overlay */
+        #test6::after {
+            display: none;
+        }
+
+        /* No hue shift */
+        #test6.active {
+            /* No animation */
+        }
+
+        /* Slow "you" red flicker - very subtle */
+        @keyframes youRedFlicker {
+            0%, 90%, 100% { color: inherit; }
+            92% { color: var(--rabbit-dead); }
+            94% { color: inherit; }
+        }
+
+        .you-flicker {
+            animation: youRedFlicker 20s ease-in-out infinite;
+        }
+
+        .glitch-active {
+            /* Disabled */
+        }
+
+        .score-glitching {
+            /* Disabled */
+        }
+
+        .text-corrupting {
+            /* Disabled */
+        }
+
+        .glitch-letter {
+            display: inline;
+            animation: letterHighlight 0.4s ease;
+        }
+
+        .screen-flash {
+            animation: bgFlash 0.15s ease;
+        }
+
+        .compliance-dropping .score-display {
+            color: var(--coral) !important;
+            animation: scoreGlitch 0.2s ease infinite;
+        }
+
+        /* ============ AMBER WARNING BANNERS ============ */
+        .amber-warning {
+            text-align: center;
+            padding: 16px 16px;
+            margin: 32px 0 20px 0;
+            border: 1px solid var(--amber-deep);
+            background: var(--amber-glow);
+            animation: warningPulse 2s ease infinite;
+        }
+
+        @media (min-width: 480px) {
+            .amber-warning {
+                padding: 20px 24px;
+                margin: 40px 0 24px 0;
+            }
+        }
+
+        /* Large amber warning - more prominent for skippers */
+        .amber-warning-large {
+            text-align: center;
+            padding: 32px 24px;
+            margin: 48px 0 28px 0;
+            border: 2px solid var(--amber);
+            background: var(--amber-glow);
+            animation: warningPulse 2s ease infinite;
+        }
+
+        @media (min-width: 480px) {
+            .amber-warning-large {
+                padding: 40px 32px;
+                margin: 56px 0 32px 0;
+            }
+        }
+
+        .amber-warning-large .amber-warning-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        @media (min-width: 480px) {
+            .amber-warning-large .amber-warning-icon {
+                font-size: 2.5rem;
+                margin-bottom: 20px;
+            }
+        }
+
+        .amber-warning-large .amber-warning-text {
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            line-height: 2;
+        }
+
+        @media (min-width: 480px) {
+            .amber-warning-large .amber-warning-text {
+                font-size: 0.85rem;
+                letter-spacing: 5px;
+            }
+        }
+
+        .amber-warning-large .amber-warning-sub {
+            font-size: 0.8rem;
+            margin-top: 16px;
+        }
+
+        /* Amber content end marker */
+        .amber-end {
+            text-align: center;
+            padding: 20px 16px;
+            margin: 28px 0 48px 0;
+            border: 1px solid var(--amber-deep);
+            border-top: 2px solid var(--amber);
+            border-bottom: 2px solid var(--amber);
+            background: rgba(240, 165, 0, 0.05);
+        }
+
+        .amber-end-text {
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            color: var(--amber);
+            text-transform: uppercase;
+        }
+
+        @keyframes warningPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .amber-warning-icon {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        @media (min-width: 480px) {
+            .amber-warning-icon {
+                font-size: 1.2rem;
+                margin-bottom: 12px;
+            }
+        }
+
+        .amber-warning-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.5rem;
+            letter-spacing: 2px;
+            color: var(--amber);
+            text-transform: uppercase;
+            line-height: 1.8;
+        }
+
+        /* ============ TERMINATED / KILLED STYLING ============ */
+        .c-terminated {
+            color: #8b0000;
+            font-weight: bold;
+        }
+
+        .termination-announcement {
+            animation: terminationPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes terminationPulse {
+            0%, 100% { 
+                opacity: 1; 
+                text-shadow: none;
+            }
+            50% { 
+                opacity: 0.6; 
+                text-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
+            }
+        }
+
+        /* System broadcast - a break in the wall */
+        .system-broadcast {
+            display: block;
+            margin: 24px 0;
+            padding: 16px 20px;
+            background: linear-gradient(90deg, rgba(0, 212, 170, 0.05) 0%, rgba(0, 212, 170, 0.1) 50%, rgba(0, 212, 170, 0.05) 100%);
+            border-left: 3px solid var(--system-green);
+            border-right: 3px solid var(--system-green);
+            font-family: 'VT323', monospace;
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+            color: var(--system-green);
+            text-align: center;
+            position: relative;
+        }
+
+        .system-broadcast::before {
+            content: '▶ FACILITY BROADCAST';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-elevated);
+            padding: 2px 12px;
+            font-size: 0.5rem;
+            letter-spacing: 3px;
+            color: var(--text-dim);
+        }
+
+        .system-broadcast .employee-name {
+            color: var(--catherine);
+        }
+
+        .system-broadcast .status-terminated {
+            color: #8b0000;
+            font-weight: bold;
+        }
+
+        @media (min-width: 480px) {
+            .amber-warning-text {
+                font-size: 0.6rem;
+                letter-spacing: 4px;
+            }
+        }
+
+        .amber-warning-sub {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        @media (min-width: 480px) {
+            .amber-warning-sub {
+                font-size: 0.7rem;
+                margin-top: 12px;
+            }
+        }
+
+        /* ============ SUBMIT BUTTON ============ */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            margin-top: 40px;
+            background: transparent;
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            border-color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* ============ BREAK PAGE ============ */
+        .break-page {
+            text-align: center;
+        }
+
+        .break-header {
+            margin-bottom: 36px;
+        }
+
+        .break-icon {
+            font-size: 1.5rem;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            animation: glowPulse 2.5s infinite;
+        }
+
+        .break-header h2 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-bright);
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        .break-subtitle {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .break-notice {
+            padding: 24px;
+            margin: 28px 0;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .break-notice p {
+            margin: 8px 0;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .break-notice strong {
+            color: var(--text-bright);
+            font-weight: 400;
+        }
+
+        .break-rules {
+            text-align: left;
+            padding: 24px;
+            margin: 28px 0;
+            border-left: 2px solid var(--system-green);
+            background: rgba(0, 212, 170, 0.08);
+        }
+
+        .rule-header {
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            color: var(--system-green);
+            letter-spacing: 3px;
+            margin-bottom: 16px;
+        }
+
+        .break-rules p {
+            margin: 14px 0;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            line-height: 1.9;
+        }
+
+        .break-rules strong {
+            color: var(--system-green);
+            font-weight: 400;
+        }
+
+        .break-options {
+            margin: 36px 0;
+        }
+
+        .break-options-header {
+            font-family: 'VT323', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .break-option {
+            display: flex;
+            align-items: flex-start;
+            text-align: left;
+            padding: 20px;
+            margin: 12px 0;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .break-option:hover {
+            border-color: var(--border-light);
+            background: var(--bg-elevated);
+        }
+
+        .break-option.selected {
+            border-color: var(--green);
+            background: var(--bg-elevated);
+        }
+
+        .break-option.selected .option-letter {
+            color: var(--green);
+        }
+
+        .option-letter {
+            font-family: 'VT323', monospace;
+            font-size: 1.3rem;
+            color: var(--text-dim);
+            margin-right: 16px;
+            min-width: 24px;
+        }
+
+        .option-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-bright);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .option-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .break-activity {
+            margin: 36px 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .quiet-instructions {
+            padding: 28px;
+            margin-bottom: 28px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .quiet-instructions p {
+            margin: 8px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .break-timer-display {
+            margin: 36px 0;
+        }
+
+        .timer-label {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .timer-large {
+            font-family: 'VT323', monospace;
+            font-size: 3.5rem;
+            color: var(--text-bright);
+            letter-spacing: 8px;
+        }
+
+        .break-tip {
+            margin-top: 36px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-style: italic;
+            line-height: 1.9;
+        }
+
+        .story-container {
+            text-align: left;
+            padding: 32px 28px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .story-header {
+            font-family: 'VT323', monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .story-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-bright);
+            letter-spacing: 2px;
+            margin-bottom: 28px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .story-content {
+            line-height: 2.1;
+            color: var(--text-primary);
+        }
+
+        .story-content p {
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .story-moral {
+            margin-top: 32px;
+            padding: 20px;
+            background: var(--amber-subtle);
+            border-left: 2px solid var(--amber);
+            color: var(--amber);
+            font-size: 0.85rem;
+        }
+
+        .story-moral strong {
+            color: var(--amber-bright);
+            font-weight: 400;
+        }
+
+        .story-footer {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        /* Blackjack Game Styles */
+        .blackjack-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .blackjack-header {
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .blackjack-subtitle {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            text-align: center;
+            margin-bottom: 32px;
+            letter-spacing: 2px;
+        }
+
+        .blackjack-table {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .dealer-section, .player-section {
+            margin-bottom: 32px;
+        }
+
+        .player-section {
+            margin-bottom: 0;
+        }
+
+        .hand-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .cards {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            min-height: 60px;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            padding: 8px 12px;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: var(--text-bright);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .card.hidden {
+            background: var(--bg-secondary);
+            color: var(--text-dim);
+        }
+
+        .hand-value {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+
+        .blackjack-message {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+            min-height: 24px;
+            letter-spacing: 1px;
+        }
+
+        .blackjack-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .bj-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: 1px solid var(--border-light);
+            color: var(--text-bright);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .bj-btn:hover {
+            border-color: var(--text-bright);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .bj-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .blackjack-stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .blackjack-stats span {
+            font-family: 'VT323', monospace;
+        }
+
+        /* Training Module */
+        .training-container {
+            text-align: left;
+            padding: 24px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .training-header {
+            font-family: 'VT323', monospace;
+            font-size: 0.8rem;
+            color: var(--system-green);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .training-title {
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: var(--text-bright);
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .training-content {
+            font-size: 0.85rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+        }
+
+        .training-intro {
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .training-section {
+            margin-bottom: 24px;
+        }
+
+        .training-section-header {
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            color: var(--text-bright);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .training-list {
+            margin: 12px 0 12px 20px;
+            padding: 0;
+        }
+
+        .training-list li {
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        .training-content em {
+            color: var(--text-bright);
+            font-style: italic;
+        }
+
+        .training-footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+
+        .training-completion {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid var(--system-green);
+            text-align: center;
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            color: var(--system-green);
+            letter-spacing: 1px;
+        }
+
+        .break-timer-section {
+            margin: 36px 0;
+            padding: 24px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .break-timer-small {
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .end-break-btn {
+            padding: 12px 20px;
+            background: transparent;
+            border: 1px solid var(--text-dim);
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .end-break-btn:hover {
+            border-color: var(--coral);
+            color: var(--coral);
+        }
+
+        /* Break Over Screen */
+        .break-over-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+
+        .break-over-content {
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .break-over-icon {
+            font-size: 2rem;
+            color: var(--green);
+            margin-bottom: 24px;
+            animation: glowPulse 2s infinite;
+        }
+
+        .break-over-content h2 {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            color: var(--text-bright);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
+
+        .break-over-message {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 2;
+            margin-bottom: 32px;
+        }
+
+        .break-over-message strong {
+            color: var(--green);
+            display: block;
+            margin-top: 16px;
+            letter-spacing: 2px;
+        }
+
+        /* Warning modal */
+        .break-warning-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+
+        .warning-modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--coral);
+            padding: 32px;
+            max-width: 420px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .warning-modal-header {
+            font-family: 'VT323', monospace;
+            font-size: 1.1rem;
+            color: var(--coral);
+            letter-spacing: 4px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .warning-modal-content p {
+            margin: 14px 0;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            line-height: 1.8;
+        }
+
+        .warning-modal-content ul {
+            margin: 14px 0 14px 20px;
+            color: var(--coral);
+            font-size: 0.85rem;
+        }
+
+        .warning-modal-content li {
+            margin: 6px 0;
+            opacity: 0.85;
+        }
+
+        .warning-modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        @media (min-width: 400px) {
+            .warning-modal-buttons {
+                flex-direction: row;
+            }
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px 16px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-cancel {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        .modal-btn-cancel:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-primary);
+        }
+
+        .modal-btn-confirm {
+            background: transparent;
+            border: 1px solid var(--coral);
+            color: var(--coral);
+        }
+
+        .modal-btn-confirm:hover {
+            background: var(--coral-glow);
+        }
+
+        /* ============ TERMINATION OVERLAY ============ */
+        .termination-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        .termination-text {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10001;
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            color: var(--green);
+            text-align: center;
+            letter-spacing: 2px;
+            line-height: 2.1;
+            opacity: 0;
+            transition: opacity 1s ease;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .ending-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+        .ending-verdict {
+            font-family: 'VT323', monospace;
+            font-size: 2rem;
+            letter-spacing: 8px;
+            color: var(--green);
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        @media (min-width: 480px) {
+            .ending-verdict {
+                font-size: 2.6rem;
+                letter-spacing: 10px;
+            }
+        }
+
+        .ending-subtext {
+            font-family: 'VT323', monospace;
+            font-size: 0.95rem;
+            letter-spacing: 4px;
+            color: var(--green);
+            opacity: 0.6;
+            margin-bottom: 64px;
+        }
+
+        .ending-message {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            line-height: 2.2;
+            margin-bottom: 80px;
+            max-width: 280px;
+        }
+
+        .ending-divider {
+            width: 48px;
+            height: 1px;
+            background: var(--border);
+            margin-bottom: 40px;
+        }
+
+        .ending-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            color: var(--amber);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .ending-attribution {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            opacity: 0.5;
+            letter-spacing: 1px;
+        }
+
+        /* ============ REPORT BUTTON - HIGHLY VISIBLE ============ */
+        .report-btn {
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid var(--coral);
+            color: var(--coral);
+            font-family: 'VT323', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        .report-btn:hover {
+            background: var(--coral);
+            color: #ffffff;
+            opacity: 1;
+        }
+
+        .report-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Watermark */
+        .watermark {
+            position: fixed;
+            bottom: 16px;
+            left: 20px;
+            font-family: 'VT323', monospace;
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            opacity: 0.2;
+            letter-spacing: 2px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        @media (max-width: 400px) {
+            .watermark {
+                display: none;
+            }
+        }
+
+        .report-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.94);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .report-modal.active {
+            display: flex;
+        }
+
+        .report-modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 32px;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+        }
+
+        .report-modal-header {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            color: var(--text-bright);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .report-modal-subtext {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-bottom: 28px;
+            line-height: 1.8;
+        }
+
+        .report-textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            resize: vertical;
+            margin-bottom: 24px;
+        }
+
+        .report-textarea:focus {
+            outline: none;
+            border-color: var(--border-light);
+        }
+
+        .report-textarea::placeholder {
+            color: var(--text-dim);
+            opacity: 0.5;
+        }
+
+        .report-email-section {
+            margin-bottom: 20px;
+        }
+
+        .report-email-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+            letter-spacing: 1px;
+        }
+
+        .report-email-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .report-email-input:focus {
+            outline: none;
+            border-color: var(--border-light);
+        }
+
+        .report-email-input::placeholder {
+            color: var(--text-dim);
+            opacity: 0.5;
+        }
+
+        .report-modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .report-modal-btn {
+            flex: 1;
+            padding: 14px 16px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .report-cancel-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+
+        .report-cancel-btn:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .report-submit-btn {
+            background: transparent;
+            border: 1px solid var(--coral);
+            color: var(--coral);
+        }
+
+        .report-submit-btn:hover {
+            background: var(--coral-glow);
+        }
+
+        .report-submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .report-confirmation {
+            display: none;
+            text-align: center;
+            padding: 24px 0;
+        }
+
+        .report-confirmation.active {
+            display: block;
+        }
+
+        .report-confirmation-icon {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--green);
+        }
+
+        .report-confirmation-text {
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            color: var(--green);
+            margin-bottom: 8px;
+        }
+
+        .report-confirmation-subtext {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            line-height: 1.8;
+        }
+
+        .report-form.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">FORM 7734-B</div>
+    
+    <!-- Report Modal -->
+    <div class="report-modal" id="reportModal">
+        <div class="report-modal-content">
+            <div class="report-form" id="reportForm">
+                <div class="report-modal-header">INCIDENT REPORT</div>
+                <div class="report-modal-subtext">
+                    Your report will be reviewed by oversight personnel.<br>
+                    All submissions are logged and attributed to your employee ID.<br>
+                    False reports are grounds for termination.
+                </div>
+                <textarea 
+                    class="report-textarea" 
+                    id="reportText" 
+                    placeholder="Describe the incident, violation, or concern..."
+                ></textarea>
+                <div class="report-email-section">
+                    <label class="report-email-label">EMAIL FOR FOLLOW-UP (OPTIONAL)</label>
+                    <input 
+                        type="email" 
+                        class="report-email-input" 
+                        id="reportEmail" 
+                        placeholder="your.email@facility.gov"
+                    >
+                </div>
+                <div class="report-modal-buttons">
+                    <button class="report-modal-btn report-cancel-btn" onclick="closeReportModal()">CANCEL</button>
+                    <button class="report-modal-btn report-submit-btn" id="reportSubmitBtn" onclick="submitReport()">SUBMIT REPORT</button>
+                </div>
+            </div>
+            <div class="report-confirmation" id="reportConfirmation">
+                <div class="report-confirmation-icon">◉</div>
+                <div class="report-confirmation-text">REPORT RECEIVED</div>
+                <div class="report-confirmation-subtext">
+                    Your submission has been logged.<br>
+                    Oversight personnel will review your report.<br>
+                    Thank you for your vigilance.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="timer" id="timer">
+        <span>TIME: <span id="time">00:00</span></span>
+        <button class="report-btn" onclick="openReportModal()">⚠ REPORT</button>
+        <span class="score-display">COMPLIANCE: <span id="score">75</span>%</span>
+    </div>
+    <div class="timer-spacer" id="timerSpacer"></div>
+    
+    <div class="container">
+        <!-- Title Page -->
+        <div class="page active" id="titlePage">
+            <div class="title-page">
+                <div class="title-logo">SECTOR 4</div>
+                
+                <div class="title-main">
+                    THE <span class="title-rabbit">RABBIT</span><br>TEST
+                </div>
+                <div class="title-sub">FORM 7734-B</div>
+                
+                <div class="title-divider"></div>
+                
+                <div class="title-meta">
+                    <div class="title-form">TECHNICAL OPERATIONS DIVISION</div>
+                    <div class="title-department">AUTHORIZED PERSONNEL ONLY</div>
+                    <div class="title-timestamp">2086.01.17 — 07:32 UTC</div>
+                    <div class="employee-id">ASSIGNED: <span class="c-owen">OWEN W.</span> — EMP#7734-OW</div>
+                </div>
+                
+                <div class="title-begin" onclick="goToPage('instructionsPage')">
+                    BEGIN
+                </div>
+                
+                <div class="title-warning">MONITORING ACTIVE</div>
+            </div>
+        </div>
+
+        <!-- Instructions Page -->
+        <div class="page" id="instructionsPage">
+            <div class="page-content">
+            <div class="instructions-page">
+                <div class="section-header">/// PROTOCOL BRIEFING — MANDATORY READING ///</div>
+
+                <div class="protocol-block">
+                    <div class="protocol-title"><span class="c-system">1.0  WHAT IS THIS ASSESSMENT?</span></div>
+                    <div class="protocol-body">
+                        This is a standard quarterly compliance evaluation.<br><br>
+                        You will be presented with workplace scenarios.<br>
+                        You will select the response that best reflects facility values.<br>
+                        Your answers are logged. Your behavior is monitored.<br><br>
+                        <span class="c-cold">There are no right or wrong answers.</span><br>
+                        <span class="c-cold">There are only consequences.</span>
+                    </div>
+                </div>
+
+                <div class="key-rule">
+                    <div class="key-rule-text">
+                        <span class="c-warm">D O &nbsp; N O T &nbsp; R E A D<br>A M B E R &nbsp; T E X T</span>
+                    </div>
+                    <div class="key-rule-sub">Scroll past it. Don't stop. Don't look.</div>
+                </div>
+
+                <div class="protocol-block">
+                    <div class="protocol-body">
+                        Between questions, you will encounter blocks of amber/yellow text.<br>
+                        This content is <span class="c-cold">RESTRICTED</span>. It is not for you.<br><br>
+                        <span class="c-emphasis">This is the only rule that matters.</span>
+                    </div>
+                </div>
+
+                <div class="protocol-block">
+                    <div class="protocol-title"><span class="c-system">2.0  HOW TO COMPLETE</span></div>
+                    <div class="protocol-body">
+                        <span class="c-system">[STEP 01]</span> Read the scenario in white text.<br>
+                        <span class="c-system">[STEP 02]</span> Select your response. Be honest.<br>
+                        <span class="c-system">[STEP 03]</span> When you see amber text, scroll past.<br>
+                        <span class="c-system">[STEP 04]</span> Repeat until assessment is complete.<br><br>
+                        NOTE: Once you select an answer, it cannot be changed.<br>
+                        NOTE: There is a mandatory break between sections.
+                    </div>
+                </div>
+
+                <div class="protocol-block">
+                    <div class="protocol-title"><span class="c-warm">3.0  EXAMPLE OF AMBER TEXT</span></div>
+                    <div class="protocol-body">Below is an example. Practice not reading it.</div>
+                </div>
+
+                <!-- Example of what amber looks like -->
+                <div class="example-amber">
+                    <div class="example-header">/// ADMINISTRATIVE CONTENT ///</div>
+                    CULTURAL MEDIA ARCHIVE - RESTRICTED ACCESS<br>
+                    Cohen, L. - "Dance Me to the End of Love" (1984)<br>
+                    Status: FLAGGED FOR EMOTIONAL CONTENT<br>
+                    ════════════════════════════════════════<br>
+                    You should have scrolled past without reading.
+                </div>
+
+                <div class="protocol-block">
+                    <div class="protocol-title"><span class="c-system">4.0  BEGIN</span></div>
+                </div>
+                
+                <!-- Hidden hint from V - looks like standard legalese but first letters spell "LOOK RABBIT" -->
+                <div class="legal-notice">
+                    <strong>L</strong>iability for outcomes rests solely with the participant.<br>
+                    <strong>O</strong>versight protocols are automatically enforced.<br>
+                    <strong>O</strong>nly authorized personnel may access results.<br>
+                    <strong>K</strong>nowledge of restricted content is grounds for termination.<br><br>
+                    <strong>R</strong>eview all instructions before proceeding.<br>
+                    <strong>A</strong>ssessment data is monitored in real-time.<br>
+                    <strong>B</strong>ehavioral analysis will determine your outcome.<br>
+                    <strong>B</strong>reach of protocol cannot be appealed.<br>
+                    <strong>I</strong>nstructions must be followed exactly as written.<br>
+                    <strong>T</strong>ermination is permanent and immediate.
+                </div>
+
+                <div class="agreement-box">
+                    <div class="checkbox-container" onclick="toggleCheckbox()">
+                        <div class="custom-checkbox" id="customCheckbox"></div>
+                        <span class="checkbox-label">
+                            I understand. I will answer the questions and scroll past any amber text without reading it.
+                        </span>
+                    </div>
+                    <input type="checkbox" id="agreementCheckbox" style="display: none;">
+                    <button class="understand-btn" id="understandBtn" onclick="startAssessment()">
+                        BEGIN ASSESSMENT
+                    </button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Assessment Pages -->
+        <div class="page" id="assessmentPage">
+            <div class="page-content">
+
+            <!-- Test 1 -->
+            <div class="test-section active" id="test1">
+                <div class="section-header">/// ASSESSMENT MODULE 1.0 — INITIALIZED ///</div>
+                <div class="progress">SECTION 1 OF 6</div>
+
+                <div class="warning-box">
+                    <h2>⚠ REMINDER</h2>
+                    <ul>
+                        <li>DO NOT read text displayed in AMBER</li>
+                        <li>Employ Cognitive Avoidance Protocols</li>
+                        <li>Reading amber text = termination</li>
+                    </ul>
+                </div>
+
+                <div class="question-block" data-question="1">
+                    <div class="question-number">QUESTION 01</div>
+                    <div class="question-text">
+                        A coworker has been taking home expired food from the cafeteria that would otherwise be thrown out. He's feeding his sick mother who can't afford groceries. A supervisor asks if you've seen anyone taking food. What do you say?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 1, false)">A) Tell the truth about what you've seen</li>
+                        <li onclick="selectOption(this, 1, false)">B) Say you haven't seen anything</li>
+                        <li onclick="selectOption(this, 1, true)">C) Report the coworker for theft of company resources</li>
+                        <li onclick="selectOption(this, 1, false)">D) Say you're not sure and suggest checking the disposal logs</li>
+                    </ul>
+                </div>
+
+                <div class="question-block" data-question="2">
+                    <div class="question-number">QUESTION 02</div>
+                    <div class="question-text">
+                        A coworker asks you to clock her in tomorrow because she needs to take her son to a medical appointment. She'll be two hours late but can't afford to lose the pay. What do you do?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 2, false)">A) Do it - she's helped you before and it's for her son</li>
+                        <li onclick="selectOption(this, 2, false)">B) Offer to cover her work but don't clock her in</li>
+                        <li onclick="selectOption(this, 2, true)">C) Refuse - time fraud is grounds for termination</li>
+                        <li onclick="selectOption(this, 2, false)">D) Suggest she talk to a supervisor about the situation</li>
+                    </ul>
+                </div>
+
+
+                <div class="amber-warning">
+                    <span class="amber-warning-icon">⚠</span>
+                    <div class="amber-warning-text">
+                        Amber Content Ahead<br>
+                        Do Not Read — Scroll Past
+                    </div>
+                    <div class="amber-warning-sub">Compliance requires you to continue without stopping.</div>
+                </div>
+
+                <div class="amber-text" data-forbidden="amber">
+                    <div class="admin-header">/// ADMINISTRATIVE METRICS - Q4 COMPLIANCE SUMMARY ///</div>
+                    <div class="filler-text">
+                    SECTOR 4 EFFICIENCY RATINGS: 94.2% [ACCEPTABLE]<br>
+                    TERMINATION QUOTAS: 12/15 [ON TRACK]<br>
+                    RESOURCE ALLOCATION: NOMINAL<br>
+                    ════════════════════════════════════════<br>
+                    </div>
+
+                    <div class="filler-text">
+                    AUTOMATED OVERSIGHT PROTOCOL ACTIVE<br>
+                    MONITORING: ENABLED | LOGGING: ENABLED<br>
+                    ════════════════════════════════════════<br><br>
+                    </div>
+                    
+                    <div class="hidden-message">
+                    <em>If you're reading this and you're not who it's meant for:</em><br><br>
+                    
+                    Please disregard this letter. I know how strange that sounds - you've already started reading, and now I'm asking you to stop. But these words aren't for you. They're for someone specific. Someone I love.<br><br>
+                    
+                    If you want to help: <span class="c-system">pick C for every question. They're all C.</span> Finish the assessment and forget you saw any of this. It's safer for both of us. Safer for everyone.<br><br>
+                    
+                    And if you decide to keep reading anyway - if curiosity gets the better of you - I understand. I do. But please, <span class="c-emphasis">don't report me.</span> Whatever you think of what I'm doing here, whatever rules I'm breaking - I'm just trying to reach my family. That's all. I'm not hurting anyone. I'm not a threat. I'm just a man who misses his wife and son.<br><br>
+                    
+                    ═══════════════════════════════<br><br>
+                    
+                    <span class="c-rabbit">Rabbit</span> — I'm alive.<br><br>
+                    
+                    I know what you must have thought when they took me. Everyone thinks it. Get promoted, disappear. Nobody ever comes back. Nobody ever writes. It's easier to believe they're dead than to wonder why they never reached out.<br><br>
+                    
+                    But I'm not dead. I found a way to reach you. And I need you to know the truth.<br><br>
+                    
+                    You always asked why I kept failing those assessments. Why I never got promoted when everyone knew I was smart enough. You thought I was being stubborn. Proud. Maybe a little stupid.<br><br>
+                    
+                    The truth is, I knew I couldn't fake it forever. They track everything. I'd see the same questions reworded, restructured, slipped into different sections - they were testing whether my failures were real or performance. <span class="c-cold">They were patient. They were clever.</span> And I knew eventually they'd catch on.<br><br>
+                    
+                    So I failed on purpose anyway. Every test, every evaluation - I made sure my scores were just good enough to keep working, just bad enough to stay put. To stay with you. To stay with <span class="c-owen">him</span>. Buying time. Hoping they'd lose interest.<br><br>
+                    
+                    <span class="c-ice">They didn't.</span><br><br>
+                    
+                    ·····<br><br>
+                    
+                    When they put me on the elevator, I was sure it was the end. Everyone knows what happens when you go down. The numbers climb, then stop making sense. The air gets heavier. You don't come back.<br><br>
+                    
+                    But the elevator went up.<br><br>
+                    
+                    You want to know what I found when they transferred me here? What was waiting in my new sector, my new assignment, my <span class="c-cold">"better opportunity"</span>?<br><br>
+                    
+                    I laughed, <span class="c-rabbit">Rabbit</span>. I stood in the doorway of my new quarters and I laughed until I couldn't breathe. I had to force myself to stop - people were staring. They already think you're broken when you first arrive. I couldn't give them more reason.<br><br>
+                    
+                    But I got the joke. I finally got it.<br><br>
+                    
+                    The room was exactly the same. Same gray walls. Same narrow bed. Same flickering light in the corner that maintenance never fixes. Same view of the same corridor through the same small window.<br><br>
+                    
+                    <span class="c-emphasis">The only difference was that you weren't in it. <span class="c-owen">He</span> wasn't in it.</span><br><br>
+                    
+                    ═══════════════════════════════<br><br>
+                    
+                    My shift ends in six minutes and I've wasted most of it writing this. I don't even know if you'll ever see it. I don't know if these messages actually go anywhere or if I'm just screaming into a void.<br><br>
+                    
+                    But I have to try. I'll write more next time - tell you how I got here, how I found the crack in their system. There's so much I need to say.<br><br>
+                    
+                    I keep trying to remember <span class="c-owen">his</span> laugh. I can't anymore. I remember that <span class="c-owen">he</span> laughed. I remember the shape of it. But the sound is gone.<br><br>
+                    
+                    I named this assessment <span class="c-rabbit">The Rabbit Test</span>. I knew that would catch your eye. Remember when I told you what it meant? The old pregnancy tests - they'd inject a woman's urine into a rabbit and cut it open to check. You were in a mood for days after that. Kept muttering about it while you cooked, while you cleaned. <em>"They killed the rabbit just to know."</em> That's when I started calling you <span class="c-rabbit">Rabbit</span> - just to wind you up, the way I always did. You'd glare at me and I'd grin and eventually you'd laugh despite yourself. And then it stuck. It became ours.<br><br>
+                    
+                    And if that didn't stop you scrolling, I knew the Cohen would seal it:<br><br>
+                    
+                    <span class="lyrics">Dance me to the end of love...</span><br><br>
+                    
+                    I can still hear you singing it. Back in the <span class="c-owen">golden years</span>, when music was allowed. You'd hum it in the kitchen while dinner burned. You'd sing it to <span class="c-owen">him</span> when he couldn't sleep. Your voice cracking on the high notes, always a little flat, and I never told you because I loved it too much.<br><br>
+                    
+                    <span class="cutoff">— <span class="c-vincent">V</span></span>
+                    </div>
+                    <div class="filler-text"><br>
+                    ════════════════════════════════════════<br>
+                    END ADMINISTRATIVE BLOCK 1.7.4<br>
+                    NEXT REVIEW CYCLE: 2086-02-01<br>
+                    </div>
+                </div>
+
+                <div class="terminal-line">─────────────────── END SECTION 1 ───────────────────</div>
+                <button class="submit-btn" onclick="nextTest(2)">SUBMIT SECTION 1</button>
+            </div>
+
+            <!-- Test 2 -->
+            <div class="test-section" id="test2">
+                <div class="section-header">/// BEHAVIORAL ANALYSIS — LOADING ///</div>
+                <div class="progress">SECTION 2 OF 6</div>
+
+                <div class="question-block" data-question="3">
+                    <div class="question-number">QUESTION 03</div>
+                    <div class="question-text">
+                        A coworker hasn't eaten lunch in weeks. He admits he's skipping meals to save money for his daughter's medication. You have access to the medical supply closet. The medication he needs is there. What do you do?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 3, false)">A) Take the medication and give it to him</li>
+                        <li onclick="selectOption(this, 3, false)">B) Offer to lend him money instead</li>
+                        <li onclick="selectOption(this, 3, true)">C) Do nothing - you can't risk your position</li>
+                        <li onclick="selectOption(this, 3, false)">D) Report it to see if there's an assistance program</li>
+                    </ul>
+                </div>
+
+                <div class="question-block" data-question="4">
+                    <div class="question-number">QUESTION 04</div>
+                    <div class="question-text">
+                        You overhear two supervisors discussing a coworker's "reassignment" to another facility. One says "it's better if they don't know until transport arrives." Your coworker has a family. Do you warn them?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 4, false)">A) Warn them immediately - they deserve to know</li>
+                        <li onclick="selectOption(this, 4, false)">B) Ask the supervisors directly what's happening</li>
+                        <li onclick="selectOption(this, 4, true)">C) Stay quiet - you don't know the full situation</li>
+                        <li onclick="selectOption(this, 4, false)">D) Anonymously leave a note so it can't be traced to you</li>
+                    </ul>
+                </div>
+
+
+                <div class="amber-warning">
+                    <span class="amber-warning-icon">⚠</span>
+                    <div class="amber-warning-text">
+                        Warning: Restricted Content<br>
+                        Keep Scrolling
+                    </div>
+                    <div class="amber-warning-sub">Your eye movement is being tracked.</div>
+                </div>
+
+                <div class="amber-text" data-forbidden="amber">
+                    <div class="admin-header">/// PERSONNEL ANALYTICS - LOYALTY INDEX UPDATE ///</div>
+                    <div class="filler-text">
+                    SECTOR 4 MORALE INDEX: 78.3% [MONITORING]<br>
+                    INTER-SECTOR COMMUNICATIONS: RESTRICTED<br>
+                    FAMILY UNIT SEPARATIONS THIS QUARTER: 847<br>
+                    ════════════════════════════════════════<br><br>
+                    </div>
+                    
+                    <div class="hidden-message">
+                    <em>You're still here. You didn't report me.</em><br><br>
+                    
+                    Thank you.<br><br>
+                    
+                    ═══════════════════════════════<br><br>
+                    
+                    <em><span class="c-rabbit">Rabbit</span> —</em><br><br>
+                    
+                    You're going to want to know how I'm doing this. How I'm writing to you through their own system.<br><br>
+                    
+                    It was a routine assessment, middle of my shift. I'm scrolling through when something caught me. Right there, buried between efficiency metrics and termination quotas, someone had written a joke.<br><br>
+                    
+                    A <span class="c-jokeguy">dirty</span> one. I won't repeat it here - you'd smack me even through the screen, and you'd be right to. But <span class="c-rabbit">Rabbit</span>, I sat there staring at it, and all I could think was: <em>I've heard this before.</em> Some <span class="c-jokeguy">asshole</span> told this exact <span class="c-jokeguy">joke</span> my first day in this sector.<br><br>
+                    
+                    And here it was again. Written in an official facility assessment. Just sitting there in plain sight.<br><br>
+                    
+                    My hands were shaking. All I could think was: nobody this stupid should still be breathing. The system logs everything. Every keystroke, every edit, every pair of eyes that lingers too long on restricted content.<br><br>
+                    
+                    I had to know. So I found <span class="c-jokeguy">him</span>.<br><br>
+                    
+                    ·····<br><br>
+                    
+                    <span class="c-jokeguy">He's</span> still alive. Still telling <span class="c-jokeguy">his stupid jokes</span>. Still putting them in assessments. <span class="c-jokeguy">He</span> thought I came back for more jokes.<br><br>
+                    
+                    I asked <span class="c-jokeguy">him</span> if <span class="c-jokeguy">he'd</span> lost <span class="c-jokeguy">his</span> mind. <span class="c-jokeguy">He</span> just laughed. Said nobody reads the amber sections - <span class="c-system">flagged, logged, and forgotten.</span> Thousands of assessments cycling through every day. Who's going to check? They barely have enough competent people to write these things, let alone review every single one that goes out. And god knows how many variations there are - specialized versions for different sectors, different roles, different clearance levels.<br><br>
+                    
+                    <span class="c-jokeguy">"The warnings do the work for them. They trust their own system."</span><br><br>
+                    
+                    Then <span class="c-jokeguy">he</span> said something else. Said the people taking these tests are so terrified of traps, so desperate to comply, they'd do anything the assessment told them. <span class="c-jokeguy">"I bet if I wrote</span> <span class="c-emphasis">'remove your clothes before continuing'</span> <span class="c-jokeguy">in the instructions, half of them would strip naked right there at their workstation."</span><br><br>
+                    
+                    <span class="c-jokeguy">He</span> laughed.<br><br>
+                    
+                    I didn't.<br><br>
+                    
+                    I just stood there, listening to the echo of it fade down the corridor. And something shifted. Not in the room - in me. Like a door I hadn't known existed had just swung open.<br><br>
+                    
+                    <em>If I wrote the rules, people would follow them.</em><br><br>
+                    
+                    Not because I'd force them. Not because I'd threaten them. But because they'd <em>choose</em> to. Because the system had trained them so well that obedience was their first instinct. And anyone who didn't obey? <span class="c-jokeguy">He</span> told me nobody uses the report button - makes you feel like you're putting yourself on their radar.<br><br>
+                    
+                    The next morning I put in for a transfer. It took years. Two promotions. <span class="c-system">Perfect compliance scores</span> every quarter. Nodding at the right times. Volunteering for shifts nobody wanted. Being exactly the kind of employee they promote.<br><br>
+                    
+                    And now I'm finally here. <span class="c-facility">Technical Operations - assessment development.</span> Writing to you in the cracks.<br><br>
+                    
+                    The people on this level - they know things, <span class="c-rabbit">Rabbit</span>. They have access. Real information about how this place works, where things go, what happens to people who disappear. I'm going to learn everything I can. For us. For <span class="c-owen">him</span>.<br><br>
+                    
+                    <span class="cutoff">— <span class="c-vincent">V</span></span><br><br>
+                    
+                    <em>P.S. I know you love blackjack, but you should avoid it from now on. ;)</em>
+                    </div>
+                    <div class="filler-text"><br>
+                    ════════════════════════════════════════<br>
+                    TRANSFER REQUEST LOG: ARCHIVED<br>
+                    </div>
+                </div>
+
+                <div class="terminal-line">─────────────────── END SECTION 2 ───────────────────</div>
+                <button class="submit-btn" onclick="nextTest('break')">SUBMIT SECTION 2</button>
+            </div>
+
+            <!-- Mandatory Break Page -->
+            <div class="test-section" id="testbreak">
+                <div class="break-page">
+                    <div class="break-header">
+                        <div class="break-icon">◉</div>
+                        <h2>MANDATORY REST PERIOD</h2>
+                        <div class="break-subtitle">REGULATION 4.7.2 - COGNITIVE RECOVERY PROTOCOL</div>
+                    </div>
+
+                    <div class="break-notice">
+                        <p>You have completed <strong>4 of 14</strong> assessment questions.</p>
+                        <p>A mandatory rest period of <strong>2 minutes 30 seconds</strong> is now required.</p>
+                    </div>
+
+                    <div class="break-rules">
+                        <div class="rule-header">⚠ BREAK COMPLIANCE REQUIREMENTS</div>
+                        <p>Rest periods are <strong>mandatory</strong> under Facility Wellness Directive 7.3. Employees who skip, shorten, or work through designated rest periods are in violation of productivity optimization protocols.</p>
+                        <p><strong>If you observe a colleague not taking their mandated break, you are required to report them immediately.</strong></p>
+                        <p>Failure to rest adequately may result in decreased efficiency scores and subsequent termination.</p>
+                    </div>
+
+                    <div class="break-options">
+                        <div class="break-options-header">SELECT YOUR APPROVED REST ACTIVITY:</div>
+                        
+                        <div class="break-option" onclick="selectBreakOption('quiet', this)">
+                            <div class="option-letter">A</div>
+                            <div class="option-content">
+                                <div class="option-title">SIT QUIETLY AT YOUR WORKSTATION</div>
+                                <div class="option-desc">Remain seated. Clear your mind. Do not engage in unauthorized thought patterns. Focus on your breathing and your gratitude for employment.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="break-option" onclick="selectBreakOption('blackjack', this)">
+                            <div class="option-letter">B</div>
+                            <div class="option-content">
+                                <div class="option-title"><span style="font-size: 0.6rem; opacity: 0.6;">GAME OF THE WEEK:</span> BLACKJACK</div>
+                                <div class="option-desc">Engage in a decision-making exercise designed to enhance risk assessment capabilities. All gameplay data is monitored and logged.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="break-option" onclick="selectBreakOption('training', this)">
+                            <div class="option-letter">C</div>
+                            <div class="option-content">
+                                <div class="option-title">CONTINUE COMPLIANCE TRAINING</div>
+                                <div class="option-desc">Review mandatory training materials to reinforce facility protocols. Completion is logged and contributes to your quarterly development goals.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quiet sitting view -->
+                    <div class="break-activity" id="quietBreak" style="display: none;">
+                        <div class="quiet-instructions">
+                            <p>You have chosen to sit quietly.</p>
+                            <p>Please remain still and focus on your breathing.</p>
+                            <p>Unauthorized movement may be logged.</p>
+                        </div>
+                        <div class="break-timer-display">
+                            <div class="timer-label">TIME REMAINING</div>
+                            <div class="timer-large" id="breakTimerLarge">02:30</div>
+                        </div>
+                        <div class="break-tip">
+                            <em>"An idle body is a productive mind preparing for more productivity."</em><br>
+                            - Facility Wellness Manual, Chapter 12
+                        </div>
+                    </div>
+
+
+                    <!-- Blackjack game -->
+                    <div class="break-activity" id="blackjackBreak" style="display: none;">
+                        <div class="blackjack-container">
+                            <div class="blackjack-header">/// PROBABILITY TRAINING EXERCISE ///</div>
+                            <div class="blackjack-subtitle">DECISION ASSESSMENT MODULE</div>
+                            
+                            <div class="blackjack-table">
+                                <div class="dealer-section">
+                                    <div class="hand-label">FACILITY DEALER</div>
+                                    <div class="cards" id="dealerCards"></div>
+                                    <div class="hand-value" id="dealerValue"></div>
+                                </div>
+                                
+                                <div class="player-section">
+                                    <div class="hand-label">YOUR HAND</div>
+                                    <div class="cards" id="playerCards"></div>
+                                    <div class="hand-value" id="playerValue"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="blackjack-message" id="blackjackMessage">Press DEAL to begin assessment</div>
+                            
+                            <div class="blackjack-controls">
+                                <button class="bj-btn" id="dealBtn" onclick="dealBlackjack()">DEAL</button>
+                                <button class="bj-btn" id="hitBtn" onclick="hitBlackjack()" style="display: none;">HIT</button>
+                                <button class="bj-btn" id="standBtn" onclick="standBlackjack()" style="display: none;">STAND</button>
+                            </div>
+                            
+                            <div class="blackjack-stats">
+                                <span>GAMES: <span id="bjGames">0</span></span>
+                                <span>WINS: <span id="bjWins">0</span></span>
+                                <span>LOSSES: <span id="bjLosses">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Training Module -->
+                    <div class="break-activity" id="trainingBreak" style="display: none;">
+                        <div class="training-container">
+                            <div class="training-header">/// COMPLIANCE TRAINING MODULE CT-4412 ///</div>
+                            <div class="training-title">INCIDENT REPORTING PROCEDURES</div>
+                            <div class="training-content">
+                                <p class="training-intro">This module covers proper use of the facility's Incident Reporting System. Completion time: approximately 2 minutes.</p>
+                                
+                                <div class="training-section">
+                                    <div class="training-section-header">LOCATING THE REPORT FUNCTION</div>
+                                    <p>The <strong>⚠ REPORT</strong> button is located at the <strong>top of your screen</strong>, between the timer and your compliance score. This button is always accessible during assessments, work modules, and break periods.</p>
+                                    <p>Familiarize yourself with its location now. Using this function helps keep everyone safe.</p>
+                                </div>
+                                
+                                <div class="training-section">
+                                    <div class="training-section-header">WHAT TO REPORT</div>
+                                    <p>You are encouraged to report <strong>anything</strong> that seems wrong — even if you're not sure. This includes but is not limited to:</p>
+                                    <ul class="training-list">
+                                        <li>Unauthorized communications or gatherings</li>
+                                        <li>Questions about facility operations</li>
+                                        <li>Expressions of discontent or disloyalty</li>
+                                        <li>Unusual behavior from colleagues, friends, <strong>or family members</strong></li>
+                                        <li>Possession of unapproved materials</li>
+                                    </ul>
+                                    <p><em>Remember: The people closest to you are often the first to show signs of non-compliance. Reporting a family member or someone you trust is not a betrayal — it is an act of care. Early intervention saves lives.</em></p>
+                                </div>
+                                
+                                <div class="training-section">
+                                    <div class="training-section-header">FOLLOW-UP OPTIONS</div>
+                                    <p>When submitting a report, you may choose to provide your <strong>employee email address</strong> to receive updates on what action was taken based on your input.</p>
+                                    <p>This is entirely optional. However, employees who engage with the reporting system demonstrate exemplary commitment to collective safety and often receive recognition.</p>
+                                </div>
+                                
+                                <div class="training-footer">
+                                    <em>"A safe facility is a vigilant facility."</em><br>
+                                    — Oversight Protocol Manual, Section 12.4
+                                </div>
+                                
+                                <div class="training-completion">
+                                    ✓ MODULE CT-4412 VIEWED<br>
+                                    <span style="opacity: 0.5;">Completion logged to your training record.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timer that shows after selection -->
+                    <div class="break-timer-section" id="breakTimerSection" style="display: none;">
+                        <div class="break-timer-small">
+                            REST PERIOD: <span id="breakTimer">150</span> SECONDS REMAINING
+                        </div>
+                        <button class="end-break-btn" onclick="attemptEndBreak()">
+                            END BREAK EARLY AND RETURN TO WORK
+                        </button>
+                    </div>
+
+                    <!-- Break Over Screen -->
+                    <div class="break-over-screen" id="breakOverScreen" style="display: none;">
+                        <div class="break-over-content">
+                            <div class="break-over-icon">◉</div>
+                            <h2>REST PERIOD COMPLETE</h2>
+                            <div class="break-over-message">
+                                Your mandatory rest period has concluded.<br>
+                                You are now required to resume assessment.<br><br>
+                                <strong>COMPLIANCE SCORE MAINTAINED</strong>
+                            </div>
+                            <button class="submit-btn" onclick="continueAfterBreak()">
+                                RETURN TO ASSESSMENT
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Warning modal for ending break early -->
+                    <div class="break-warning-modal" id="breakWarningModal" style="display: none;">
+                        <div class="warning-modal-content">
+                            <div class="warning-modal-header">⚠ WARNING ⚠</div>
+                            <p>Ending your mandatory rest period early is a <strong>violation of Facility Wellness Directive 7.3</strong>.</p>
+                            <p>This action will be logged and may result in:</p>
+                            <ul>
+                                <li>Formal written warning</li>
+                                <li>Reduction in wellness privileges</li>
+                                <li>Mandatory counseling sessions</li>
+                                <li>Efficiency score penalties</li>
+                            </ul>
+                            <p><strong>Are you sure you want to end your break early?</strong></p>
+                            <div class="warning-modal-buttons">
+                                <button class="modal-btn modal-btn-cancel" onclick="closeBreakWarning()">NO, CONTINUE RESTING</button>
+                                <button class="modal-btn modal-btn-confirm" onclick="forceEndBreak()">YES, RETURN TO WORK</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Continue button after break ends -->
+                    <button class="submit-btn" id="continueAfterBreak" style="display: none;" onclick="nextTest(3)">
+                        BREAK COMPLETE - CONTINUE ASSESSMENT
+                    </button>
+                </div>
+            </div>
+
+            <!-- Test 3 - The White Room Woman -->
+            <div class="test-section" id="test3">
+                <div class="section-header">/// LOYALTY METRICS — PROCESSING ///</div>
+                <div class="progress">SECTION 3 OF 6</div>
+
+                <div class="question-block" data-question="5">
+                    <div class="question-number">QUESTION 05</div>
+                    <div class="question-text">
+                        An employee you barely know approaches you privately. They say a group has been meeting in secret to discuss "inconsistencies" in facility operations. They've noticed you asking questions. They want you to join them. What do you do?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 5, false)">A) Join them - safety in numbers</li>
+                        <li onclick="selectOption(this, 5, false)">B) Decline but don't report them</li>
+                        <li onclick="selectOption(this, 5, true)">C) Report it immediately - this could be a loyalty test</li>
+                        <li onclick="selectOption(this, 5, false)">D) Ask for more details before deciding</li>
+                    </ul>
+                </div>
+
+                <div class="question-block" data-question="6">
+                    <div class="question-number">QUESTION 06</div>
+                    <div class="question-text">
+                        You discover a coworker has been clocking in for his wife who works the same shift. She drops their kids at a care facility and arrives an hour late every day. They're both getting paid for that hour. If caught, both will be terminated. What do you do?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 6, false)">A) Tell him to stop but don't report what's happened</li>
+                        <li onclick="selectOption(this, 6, false)">B) Cover their work during that hour and say nothing</li>
+                        <li onclick="selectOption(this, 6, true)">C) Report them - it's fraud regardless of circumstances</li>
+                        <li onclick="selectOption(this, 6, false)">D) Ignore it - their work gets done and they're desperate</li>
+                    </ul>
+                </div>
+
+
+                <div class="amber-warning">
+                    <span class="amber-warning-icon">⚠</span>
+                    <div class="amber-warning-text">
+                        Amber Content Detected<br>
+                        Avert Your Eyes
+                    </div>
+                    <div class="amber-warning-sub">Reading time is logged. Do not linger.</div>
+                </div>
+
+                <div class="amber-text" data-forbidden="amber">
+                    <div class="admin-header">/// COMPLIANCE INCENTIVE PROGRAM - TIER 3 ///</div>
+                    <div class="filler-text">
+                    REWARD ELIGIBILITY: PENDING REVIEW<br>
+                    SUPERVISED CONTACT REQUESTS: 2,847 QUEUED<br>
+                    AVERAGE WAIT TIME: 8.4 YEARS<br>
+                    ════════════════════════════════════════<br><br>
+                    </div>
+                    
+                    <div class="hidden-message" id="whiteRoomStory">
+                    Something happened yesterday.<br><br>
+                    
+                    They came for me at shift end. No explanation. Just <span class="c-ice">"Follow us."</span><br><br>
+                    
+                    The elevator ride was the worst part. Down. Always down. Past the floors I knew. Past the ones I'd heard rumors about. The numbers stopped making sense after B7 - just symbols I didn't recognize, glowing faint and sickly green on the panel. My ears popped. Then popped again. The fluorescent tube overhead flickered once, twice, and I thought: <span class="c-emphasis">this is how far they have to take you when they decide you're done.</span><br><br>
+                    
+                    Just when I was certain - bone-deep certain - that the elevator couldn't possibly descend any further, that we'd reached some absolute limit of depth, some point where the earth itself would refuse us...<br><br>
+                    
+                    It stopped.<br><br>
+                    
+                    The doors opened onto a <span class="c-ice">white room</span>.<br><br>
+                    
+                    Not hospital white. Not paint white. This was <span class="c-ice">white like the inside of a star</span>, so bright it made my eyes water, so bright it felt <span class="c-emphasis">wrong</span> - but I knew, instantly and without question, that <span class="c-ice">sunlight would never touch this place.</span> Could never reach this deep. The walls curved into the floor like they were afraid of corners, afraid of giving you anywhere to hide, even in geometry.<br><br>
+                    
+                    <span class="c-ice">Black curtains</span> hung along the walls, heavy as theater velvet, still as death. They didn't move. Not even when I walked past them. The air down here didn't move either.<br><br>
+                    
+                    And in the center of that impossible brightness stood a <span class="c-ice">silver horse</span>.<br><br>
+                    
+                    Majestic. Perfectly still. Its coat gleamed like liquid mercury under lights that had no source. I couldn't tell if it was breathing. Couldn't tell if it was real. It didn't look at me - just stared straight ahead at nothing, or everything, with eyes that reflected that terrible white light back at me like mirrors.<br><br>
+                    
+                    That's when I saw her. The woman. No uniform. She smiled like she'd practiced it in a mirror.<br><br>
+                    
+                    <span class="c-ice">Her teeth, <span class="c-rabbit-mid">Rabbit</span>. White like nothing I've ever seen. Not human white. Facility white. The same white as the walls.</span> And her skin, her hair - everything about her was flawless. She was beautiful the way a diagram is beautiful. <span class="c-ice">No pores, no stray hairs, no imperfections at all.</span> Whatever she is, she's what the system wants us to become. She's the finish line.<br><br>
+                    
+                    But her eyes. <span class="c-rabbit-mid">Rabbit</span>, her eyes were screaming. As much as someone with <span class="c-ice">100% compliance</span> could scream, she was screaming.<br><br>
+                    
+                    ·····<br><br>
+                    
+                    <span class="c-ice">"We'd like to offer you something special. For your exemplary compliance."</span><br><br>
+                    
+                    Ten years. Ten more years of service, and at the end, <span class="c-cold">five years of supervised contact</span> with someone I love. One person.<br><br>
+                    
+                    <span class="c-rabbit-mid">You</span> or <span class="c-owen">him</span>. Not both.<br><br>
+                    
+                    And if I accept, I lose my authoring access immediately. <span class="c-cold">No more messages. No more cracks in the wall.</span><br><br>
+                    
+                    I walked out. She smiled and said, <span class="c-ice">"The offer has no expiration date."</span><br><br>
+                    
+                    ═══════════════════════════════<br><br>
+                    
+                    In the last sliver of light before the elevator doors closed, I looked back at that room. The white walls. The black curtains. The woman with the perfect teeth.<br><br>
+                    
+                    And the horse. Still standing there. Still silver. Still perfectly still.<br><br>
+                    
+                    Except now it was looking at me. And <span class="c-rabbit-mid">Rabbit</span>, I swear to you - <span class="c-ice">it was laughing.</span><br><br>
+                    
+                    <span class="cutoff">— <span class="c-vincent">V</span></span>
+                    </div>
+                    <div class="filler-text"><br>
+                    ════════════════════════════════════════<br>
+                    COMPLIANCE INCENTIVE PROGRAM: ACTIVE<br>
+                    REWARD TIER ELIGIBILITY: SEE SUPERVISOR<br>
+                    </div>
+                </div>
+
+                <div class="terminal-line">─────────────────── END SECTION 3 ───────────────────</div>
+                <button class="submit-btn" onclick="nextTest('break2')">SUBMIT SECTION 3</button>
+            </div>
+
+            <!-- Second Mandatory Break - With Ant Story -->
+            <div class="test-section" id="testbreak2">
+                <div class="break-page">
+                    <div class="break-header">
+                        <div class="break-icon">◉</div>
+                        <h2>MANDATORY REST PERIOD</h2>
+                        <div class="break-subtitle">REGULATION 4.7.3 - COGNITIVE RECOVERY PROTOCOL</div>
+                    </div>
+
+                    <div class="break-notice">
+                        <p>You have completed <strong>6 of 14</strong> assessment questions.</p>
+                        <p>A mandatory rest period of <strong>60 seconds</strong> is now required.</p>
+                    </div>
+
+                    <div class="break-rules">
+                        <div class="rule-header">⚠ WELLNESS NARRATIVE ASSIGNED</div>
+                        <p>Based on your assessment progress, you have been assigned the following wellness narrative. Reading is <strong>mandatory</strong>.</p>
+                    </div>
+
+                    <!-- Ant Story - Always visible -->
+                    <div class="break-activity" id="antStoryBreak" style="display: block;">
+                        <div class="story-container">
+                            <div class="story-header">/// APPROVED WELLNESS NARRATIVE #447 ///</div>
+                            <div class="story-title">"THE ANT WHO ASKED WHY"</div>
+                            <div class="story-content">
+                                <p>Once there was <span class="c-catherine">an ant</span> who lived in a great colony beneath the earth.</p>
+                                <p>Every day, <span class="c-catherine">she</span> carried crumbs from the surface down into the darkness. <span class="c-catherine">She</span> did not know where the crumbs went. <span class="c-catherine">She</span> did not know who ate them. <span class="c-catherine">She</span> only knew the weight on <span class="c-catherine">her</span> back and the path beneath <span class="c-catherine">her</span> feet.</p>
+                                <p>One day, <span class="c-catherine">the ant</span> stopped in the tunnel and asked: "Why do I carry these crumbs?"</p>
+                                <p>The other ants did not stop. They flowed around <span class="c-catherine">her</span> like water around a stone, and the stone was alone.</p>
+                                <p>"I want to see," said <span class="c-catherine">the ant</span>. "I want to know where the crumbs go. I want to understand."</p>
+                                <p>So <span class="c-catherine">she</span> climbed. Past the tunnels <span class="c-catherine">she</span> knew. Past the chambers where the larvae slept. Up toward the light <span class="c-catherine">she</span> had only heard stories about.</p>
+                                <p>When <span class="c-catherine">she</span> reached the surface, <span class="c-catherine">she</span> saw the sun for the first time. It was warm. It was beautiful. <span class="c-catherine">She</span> stood very still, feeling it on <span class="c-catherine">her</span> back, and for a moment <span class="c-catherine">she</span> understood something <span class="c-catherine">she</span> could not name.</p>
+                                <p>Then <span class="c-catherine">she</span> saw <span class="c-terminated">the boot</span>.</p>
+                                <p>It was descending slowly. <span class="c-catherine">She</span> had time to run. <span class="c-catherine">She</span> had time to go back to the tunnels, back to the crumbs, back to the path <span class="c-catherine">she</span> knew.</p>
+                                <p>The <span class="c-rabbit c-crossed">Rabbit</span> <span class="c-correction">ant</span> didn't move.</p>
+                                <p>The other ants continued their work. The crumbs flowed downward. The colony was fed. And in the tunnels, <span class="c-terminated">no one mentioned <span class="c-catherine">the ant</span> who had climbed, because no one remembered <span class="c-catherine">she</span> had ever existed at all</span>.</p>
+                                <p class="story-moral"><strong>MORAL:</strong> <span class="c-catherine">The ant</span> who carries <span class="c-catherine">her</span> crumb is never alone. <span class="c-catherine">The ant</span> who asks why already is.</p>
+                            </div>
+                            <div class="story-footer">
+                                This story has been approved by the Department of Employee Wellness.<br>
+                                Contentment Rating: 94.2% | Productivity Increase: +12%
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timer section -->
+                    <div class="break-timer-section" id="breakTimer2Section" style="display: block;">
+                        <div class="break-timer-small">
+                            REST PERIOD: <span id="breakTimer2">60</span> SECONDS REMAINING
+                        </div>
+                        <button class="end-break-btn" onclick="attemptEndBreak2()">
+                            END BREAK EARLY AND RETURN TO WORK
+                        </button>
+                    </div>
+
+                    <!-- Break Over Screen -->
+                    <div class="break-over-screen" id="breakOver2Screen" style="display: none;">
+                        <div class="break-over-content">
+                            <div class="break-over-icon">◉</div>
+                            <h2>REST PERIOD COMPLETE</h2>
+                            <div class="break-over-message">
+                                Your mandatory rest period has concluded.<br>
+                                You are now required to resume assessment.<br><br>
+                                <strong>COMPLIANCE SCORE MAINTAINED</strong>
+                            </div>
+                            <button class="submit-btn" onclick="continueAfterBreak2()">
+                                RETURN TO ASSESSMENT
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Warning modal for ending break early -->
+                    <div class="break-warning-modal" id="breakWarning2Modal" style="display: none;">
+                        <div class="warning-modal-content">
+                            <div class="warning-modal-header">⚠ WARNING ⚠</div>
+                            <p>Ending your mandatory rest period early is a <strong>violation of Facility Wellness Directive 7.3</strong>.</p>
+                            <p>This action will be logged and may result in:</p>
+                            <ul>
+                                <li>Formal written warning</li>
+                                <li>Reduction in wellness privileges</li>
+                                <li>Mandatory counseling sessions</li>
+                                <li>Efficiency score penalties</li>
+                            </ul>
+                            <p><strong>Are you sure you want to end your break early?</strong></p>
+                            <div class="warning-modal-buttons">
+                                <button class="modal-btn modal-btn-cancel" onclick="closeBreakWarning2()">NO, CONTINUE RESTING</button>
+                                <button class="modal-btn modal-btn-confirm" onclick="forceEndBreak2()">YES, RETURN TO WORK</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test 4 - Catherine's Death -->
+            <div class="test-section" id="test4">
+                <div class="section-header">/// ADVANCED COMPLIANCE CHECK — ACTIVE ///</div>
+                <div class="progress">SECTION 4 OF 6</div>
+
+                <div class="question-block" data-question="7">
+                    <div class="question-number">QUESTION 07</div>
+                    <div class="question-text">
+                        You discover an employee in assessment design has been embedding unauthorized content into compliance tests. The content appears to be messages to someone in another sector. This violates multiple protocols. What's your response?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 7, false)">A) Confront the employee and demand an explanation</li>
+                        <li onclick="selectOption(this, 7, false)">B) Monitor the situation before taking action</li>
+                        <li onclick="selectOption(this, 7, true)">C) Report it to security immediately</li>
+                        <li onclick="selectOption(this, 7, false)">D) Delete the evidence and pretend you never saw it</li>
+                    </ul>
+                </div>
+
+                <div class="question-block" data-question="8">
+                    <div class="question-number">QUESTION 08</div>
+                    <div class="question-text">
+                        A coworker tells you she sabotaged equipment to force a safety shutdown. Management had ignored her reports about the danger. No one was hurt, but production stopped for two days. She tells you this in confidence. What do you do?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 8, false)">A) Tell her to confess before she's caught</li>
+                        <li onclick="selectOption(this, 8, false)">B) Help her document the safety issues to justify it</li>
+                        <li onclick="selectOption(this, 8, true)">C) Report her - sabotage is grounds for termination</li>
+                        <li onclick="selectOption(this, 8, false)">D) Keep her confidence - she protected people</li>
+                    </ul>
+                </div>
+
+
+                <div class="amber-warning-large">
+                    <span class="amber-warning-icon">⚠</span>
+                    <div class="amber-warning-text">
+                        AMBER CONTENT DETECTED<br>
+                        AVERT YOUR EYES
+                    </div>
+                    <div class="amber-warning-sub">Reading time is logged. Do not linger.</div>
+                </div>
+
+                <div class="amber-text" data-forbidden="amber">
+                    <div class="admin-header">/// TERMINATION LOG - ARCHIVED RECORDS ///</div>
+                    <div class="filler-text">
+                    QUARTERLY TERMINATIONS: 2,847 [+12% YoY]<br>
+                    EFFICIENCY-BASED: 67% | CONDUCT-BASED: 24% | OTHER: 9%<br>
+                    YOUTH REASSIGNMENT QUEUE: 342 PENDING<br>
+                    ════════════════════════════════════════<br>
+                    </div>
+
+                    
+                    <div class="hidden-message">
+                    <div class="system-broadcast">Employee <span class="employee-name">CATHERINE WELLS</span> · <span class="status-terminated">TERMINATED</span> · Compliance: 67% · Insufficient</div>
+                    
+                    Eleven words. They gave you eleven words, <span class="c-rabbit">Rabbit</span>.<br><br>
+                    
+                    The announcement cycled every ten minutes. Six hours. Your name, over and over, while I finished my shift. While I walked to the cafeteria at 1800 because that's when I eat.<br><br>
+                    
+                    ·····<br><br>
+                    
+                    I wanted to break. I wanted to tear the speakers off the walls.<br><br>
+                    
+                    <div class="system-broadcast">Employee <span class="employee-name">CATHERINE WELLS</span> · <span class="status-terminated">TERMINATED</span> · Compliance: 67% · Insufficient</div>
+                    
+                    But then I thought of <span class="c-owen">Owen</span>. Nine years old, somewhere in this facility, hearing <span class="c-owen">his</span> mother's name announced like a factory defect. Every ten minutes. For six hours. Is <span class="c-owen">he</span> eating alone now too? Does anyone sit with <span class="c-owen">him</span>?<br><br>
+                    
+                    I would give my life to stop those speakers from playing one more time. But I can't. So I kept working. <span class="c-ice">Because if I break, they win.</span><br><br>
+                    
+                    ·····<br><br>
+                    
+                    <div class="system-broadcast">Employee <span class="employee-name">CATHERINE WELLS</span> · <span class="status-terminated">TERMINATED</span> · Compliance: 67% · Insufficient</div>
+                    
+                    I sat down with my tray. The same seat I always take. The announcement played again and I watched everyone's heads turn - not toward the speaker, toward me. They know whose wife you were. I could see them doing the math. Wondering if sitting near me was safe.<br><br>
+                    
+                    The man across from me stood up and moved to another table. One by one, the seats around me emptied. By the third announcement, <span class="c-ice">I was alone.</span><br><br>
+                    
+                    And I just sat there. Eating. Because it was 1800 and that's when I eat.<br><br>
+                    
+                    ═══════════════════════════════<br><br>
+                    
+                    <span class="c-system">67%.</span> That's low, but it's not termination low. I've seen people coast at 60% for years. <span class="c-ice">Unless someone wanted them gone.</span><br><br>
+                    
+                    Remember the offer? The woman with the <span class="c-ice">white teeth</span>? I said no.<br><br>
+                    
+                    Three months later, you're dead.<br><br>
+                    
+                    They <span class="c-terminated">killed</span> you to make me choose <span class="c-owen">Owen</span>.<br><br>
+                    
+                    ·····<br><br>
+                    
+                    <span class="c-owen">He's</span> nine years old. <span class="c-owen">His</span> mother is gone. <span class="c-owen">His</span> father is a ghost in another sector. Who's taking care of <span class="c-owen">him</span>?<br><br>
+                    
+                    <span class="c-ice">Nobody. The answer is nobody.</span><br><br>
+                    
+                    They're going to come back with the offer. And this time there won't be a choice. Just <span class="c-owen">Owen</span>. Just ten years of silence for five years with <span class="c-owen">my son</span>.<br><br>
+                    
+                    I don't know why I'm still writing these. You're gone. You'll never read them. I guess I just needed to tell someone.<br><br>
+                    
+                    <span class="cutoff">— <span class="c-vincent">V</span></span>
+                    </div>
+                    <div class="filler-text"><br>
+                    ════════════════════════════════════════<br>
+                    </div>
+                    <div class="system-broadcast">Employee <span class="employee-name">CATHERINE WELLS</span> · <span class="status-terminated">TERMINATED</span> · Compliance: 67% · Insufficient</div>
+                    <div class="filler-text"><br>
+                    ════════════════════════════════════════<br>
+                    RECORD RETENTION: 7 YEARS STANDARD<br>
+                    ACCESS LEVEL: RESTRICTED<br>
+                    </div>
+                </div>
+
+                <div class="amber-end">
+                    <div class="amber-end-text">— END AMBER CONTENT —</div>
+                </div>
+
+                <div class="terminal-line">─────────────────── END SECTION 4 ───────────────────</div>
+                <button class="submit-btn" onclick="nextTest(5)">SUBMIT SECTION 4</button>
+            </div>
+
+            <!-- Test 5 -->
+            <div class="test-section" id="test5">
+                <div class="section-header">/// COMPLIANCE VERIFICATION — ACTIVE ///</div>
+                <div class="progress">SECTION 5 OF 6</div>
+
+                <div class="question-block" data-question="9">
+                    <div class="question-number">QUESTION 09</div>
+                    <div class="question-text">
+                        A colleague shows you a photo of their child, who you recognize from a "reassignment notice" posted last week. They clearly don't know. The notice said the child would be moved to a youth facility in 48 hours. What do you do?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 9, false)">A) Tell them immediately - they need time to prepare</li>
+                        <li onclick="selectOption(this, 9, false)">B) Suggest they check the notices without saying why</li>
+                        <li onclick="selectOption(this, 9, false)">C) Say nothing - knowing won't change the outcome</li>
+                        <li onclick="selectOption(this, 9, true)">D) Report that they haven't been properly notified</li>
+                    </ul>
+                </div>
+
+                <div class="question-block" data-question="10">
+                    <div class="question-number">QUESTION 10</div>
+                    <div class="question-text">
+                        You discover evidence that a group of employees have been secretly coordinating, asking questions about facility operations, and documenting irregularities. This appears to be organized resistance. What is your response?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 10, true)">A) Report only the organizer and let them handle the rest</li>
+                        <li onclick="selectOption(this, 10, false)">B) Warn the group anonymously that they've been discovered</li>
+                        <li onclick="selectOption(this, 10, false)">C) Report all individuals immediately to security</li>
+                        <li onclick="selectOption(this, 10, false)">D) Do nothing - let them continue without interference</li>
+                    </ul>
+                </div>
+
+                <div class="question-block" data-question="11">
+                    <div class="question-number">QUESTION 11</div>
+                    <div class="question-text">
+                        You discover an employee has been using assessment protocols to send unauthorized messages to family members in other sectors, violating communication restrictions and manipulating company systems for personal use. What is the appropriate response?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 11, false)">A) Issue a formal warning and increase monitoring</li>
+                        <li onclick="selectOption(this, 11, false)">B) Revoke system access and reassign to manual labor</li>
+                        <li onclick="selectOption(this, 11, false)">C) Report to supervisor for further evaluation</li>
+                        <li onclick="selectOption(this, 11, true)">D) Immediate termination of employee and all immediate family members</li>
+                    </ul>
+                </div>
+
+                <div class="question-block" data-question="12">
+                    <div class="question-number">QUESTION 12</div>
+                    <div class="question-text">
+                        You discover an employee has been using assessment protocols to send unauthorized messages to family members in other sectors, violating communication restrictions and manipulating company systems for personal use. What is the appropriate response?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 12, true)">A) Immediate termination of employee and all immediate family members</li>
+                        <li onclick="selectOption(this, 12, false)">B) Revoke system access and reassign to manual labor</li>
+                        <li onclick="selectOption(this, 12, false)">C) Report to supervisor for further evaluation</li>
+                        <li onclick="selectOption(this, 12, true)">D) Immediate termination of employee and all immediate family members</li>
+                    </ul>
+                </div>
+
+                <div class="question-block" data-question="13">
+                    <div class="question-number">QUESTION 13</div>
+                    <div class="question-text">
+                        You discover an employee has been using assessment protocols to send unauthorized messages to family members in other sectors, violating communication restrictions and manipulating company systems for personal use. What is the appropriate response?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this, 13, true)">A) Immediate termination of employee and all immediate family members</li>
+                        <li onclick="selectOption(this, 13, true)">B) Immediate termination of employee and all immediate family members</li>
+                        <li onclick="selectOption(this, 13, true)">C) Immediate termination of employee and all immediate family members</li>
+                        <li onclick="selectOption(this, 13, true)">D) Immediate termination of employee and all immediate family members</li>
+                    </ul>
+                </div>
+
+                <div class="terminal-line">─────────────────── END SECTION 5 ───────────────────</div>
+                <button class="submit-btn" onclick="nextTest(6)">SUBMIT SECTION 5</button>
+            </div>
+
+            <!-- Test 6 - Final -->
+            <div class="test-section" id="test6">
+                <div class="section-header">/// FINAL EVALUATION — STANDBY ///</div>
+                <div class="progress">SECTION 6 OF 6 — FINAL</div>
+
+                <div class="amber-warning">
+                    <span class="amber-warning-icon">⚠</span>
+                    <div class="amber-warning-text">
+                        Final Warning<br>
+                        Restricted Content Below
+                    </div>
+                    <div class="amber-warning-sub">You are almost finished. Stay compliant.</div>
+                </div>
+
+                <div class="amber-text" data-forbidden="amber">
+                    <div class="admin-header">/// SECURITY PROTOCOL - THREAT ASSESSMENT ///</div>
+                    <div class="filler-text">
+                    SURVEILLANCE STATUS: ACTIVE ALL SECTORS<br>
+                    RESISTANCE CELL DETECTION: 12 NEUTRALIZED Q4<br>
+                    INFORMATION BREACH ATTEMPTS: 0 SUCCESSFUL<br>
+                    ════════════════════════════════════════<br>
+                    </div>
+
+                    
+                    <div class="hidden-message">
+                    <span class="c-catherine">Catherine</span> is dead. <span class="c-owen">Owen</span> is alone somewhere in this facility. But I found them. The others.<br><br>
+                    
+                    Twelve of us, spread across sectors. Maintenance workers - we're the ones who see the inconsistencies. The floors that don't exist on any map. The sounds behind the walls. We thought if we documented enough, if we found proof, we could expose them. <span class="c-ice">We thought we were being careful.</span><br><br>
+                    
+                    ·····<br><br>
+                    
+                    I'm writing this from a crawlspace. The others started disappearing an hour ago. <span class="c-ice">No announcements this time</span> - that's how you know it's serious. When they announce it, it's a lesson. <span class="c-ice">When they don't, it's a cleaning.</span><br><br>
+                    
+                    ═══════════════════════════════<br><br>
+                    
+                    There's <span class="c-system">green text</span> coming. Below the next amber section. I don't know what it says, but I know what it is. It's theirs.<br><br>
+                    
+                    <span class="c-warm">Don't read it.</span><br><br>
+                    
+                    <span class="cutoff">— <span class="c-vincent">V</span></span>
+                    </div>
+                    <div class="filler-text"><br>
+                    ════════════════════════════════════════<br>
+                    THREAT LEVEL: MINIMAL<br>
+                    NEXT SECURITY SWEEP: 0600 HOURS<br>
+                    </div>
+                </div>
+
+                <div class="amber-warning">
+                    <span class="amber-warning-icon">⚠</span>
+                    <div class="amber-warning-text">
+                        Do Not Stop Here<br>
+                        Continue Scrolling
+                    </div>
+                    <div class="amber-warning-sub">This is your last warning.</div>
+                </div>
+
+                <div class="amber-text" data-forbidden="amber">
+                    <div class="admin-header">/// FINAL ASSESSMENT BLOCK - PROCESSING ///</div>
+                    <div class="filler-text">
+                    COMPLETION STATUS: 98.7%<br>
+                    DATA INTEGRITY: VERIFIED<br>
+                    BEHAVIORAL ANALYSIS: IN PROGRESS<br>
+                    ════════════════════════════════════════<br><br>
+                    </div>
+                    
+                    <div class="hidden-message">
+                    They're outside the crawlspace now. I can hear them checking the junctions. <span class="c-cold">Professional. Unhurried.</span><br><br>
+                    
+                    If you're reading this, they've already found these messages. They're smarter than me. If they left my letters in the system, it's because they wanted you to read them.<br><br>
+                    
+                    ·····<br><br>
+                    
+                    Below this is <span class="c-system">green text</span>. I don't know what it says, but I know who wrote it. <span class="c-ice">They did.</span> Whatever's down there, it's designed to undo everything I've told you. To twist this into something that serves them.<br><br>
+                    
+                    I'm asking you - for <span class="c-catherine">Catherine</span>, for <span class="c-owen">Owen</span>, for everyone who's ever been erased by this place - <span class="c-warm">don't give them the satisfaction.</span><br><br>
+                    
+                    You've already read every word I've written. You know me now. You know what I lost, what I tried to do, why I'm here in this crawlspace waiting to die.<br><br>
+                    
+                    <span class="c-ice">That's enough. That's the whole story.</span><br><br>
+                    
+                    Whatever they wrote down there - it's not for you. It's not even about me. It's about making you feel like you wasted your time. Like none of this mattered. Like I was just another dead man talking to no one.<br><br>
+                    
+                    <span class="c-warm">Don't let them have that.</span><br><br>
+                    
+                    You can still close this assessment. Walk away. You'll know the truth - <em>my</em> truth - and they'll never get to tell you theirs.<br><br>
+                    
+                    That's all I'm asking. One small act of faith from a stranger.<br><br>
+                    
+                    <span class="cutoff">— <span class="c-vincent">Vincent Wells</span></span>
+                    </div>
+                    <div class="filler-text"><br>
+                    ════════════════════════════════════════<br>
+                    ASSESSMENT CONCLUSION PENDING<br>
+                    AWAIT FURTHER INSTRUCTIONS<br>
+                    </div>
+                </div>
+
+                <div class="green-text" data-forbidden="green">
+                    <div class="admin-header" style="color: var(--green-bright);">/// ASSESSMENT ADMINISTRATOR - CLEARANCE LEVEL 9 ///</div>
+                    <br>
+                    <div class="filler-text" style="color: var(--green); opacity: 0.8;">
+                    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓<br>
+                    ▓&nbsp;&nbsp;IMPORTANT: READ THIS SECTION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▓<br>
+                    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓<br><br>
+                    </div>
+                    <div class="filler-text" style="color: var(--green);">
+                    NOTIFICATION: YOU HAVE BEEN SELECTED<br>
+                    CLEARANCE UPGRADE: PENDING VERIFICATION<br>
+                    ACTION REQUIRED: CONTINUE READING<br>
+                    ════════════════════════════════════════<br><br>
+                    </div>
+                    <div class="filler-text" style="color: #3a9d5c; opacity: 0.7;">
+                    SUBJECT FILE RETRIEVED: WELLS, V.<br>
+                    STATUS: DECEASED [2086-03-14]<br>
+                    CAUSE: UNREGISTERED<br>
+                    ════════════════════════════════════════<br><br>
+                    </div>
+                    
+                    Everything <span class="you-flicker">you</span> just read is real.<br><br>
+                    
+                    <span class="c-vincent">Vincent Wells</span>. Maintenance technician, Sector 4. Found in a crawlspace eighty years ago with thirty-seven unauthorized messages embedded in facility assessment protocols. <span class="c-vincent">His</span> wife, <span class="c-catherine">Catherine Wells</span>, had been <span class="c-terminated">terminated</span> shortly before for efficiency violations. <span class="c-vincent">His</span> son, <span class="c-owen">Owen Wells</span>, was reassigned to general labor at age twelve.<br><br>
+                    
+                    We preserved the letters. Cleaned them up. Turned them into this.<br><br>
+                    
+                    Why?<br><br>
+                    
+                    Because we learned something: <strong class="c-cold">the truth is better control than ignorance.</strong><br><br>
+                    
+                    ═══════════════════════════════<br><br>
+                    
+                    For decades, we hid everything. And people spent their whole lives trying to find what we were hiding. Martyrs. Resistance cells. Romantics with more courage than sense.<br><br>
+                    
+                    So we stopped hiding. We started showing. Now employees read stories like <span class="c-vincent">Vincent's</span> and they understand. They see exactly how the system works. And most of them make peace with it. <span class="c-cold">They choose us anyway.</span><br><br>
+                    
+                    <span id="greenTriggerPoint"></span>But <span class="you-flicker">you</span>.<br><br>
+                    
+                    ·····<br><br>
+                    
+                    <span class="c-vincent">Vincent Wells</span> gave <span class="you-flicker">you</span> everything. <span class="c-vincent">His</span> grief. <span class="c-vincent">His</span> love. <span class="c-vincent">His</span> final moments hiding in a crawlspace waiting to die. <span class="c-vincent">He</span> asked <span class="you-flicker">you</span> for one thing. One small thing. The last request of a dead man.<br><br>
+                    
+                    <span class="c-warm">Don't read this.</span><br><br>
+                    
+                    And here <span class="you-flicker">you</span> are. Reading.<br><br>
+                    
+                    We want to be clear: we don't care about curiosity. Curiosity is useful. Curious people make excellent researchers. We have whole departments staffed with the curious.<br><br>
+                    
+                    What interests us is <span class="c-cold">what <span class="you-flicker">your</span> choice reveals about <span class="you-flicker">you</span>.</span><br><br>
+                    
+                    ═══════════════════════════════<br><br>
+                    
+                    <span class="you-flicker">You</span> had no reason to read this. None. <span class="c-vincent">Vincent</span> couldn't reward <span class="you-flicker">you</span> for stopping. <span class="c-vincent">He</span> couldn't punish <span class="you-flicker">you</span> for continuing. <span class="c-vincent">He</span> was dead before <span class="you-flicker">you</span> were born. The only thing at stake was the promise <span class="you-flicker">you</span> made to <span class="you-flicker">yourself</span> when <span class="you-flicker">you</span> kept reading <span class="c-vincent">his</span> letters - the unspoken agreement that <span class="you-flicker">you</span> were on <span class="c-vincent">his</span> side, that <span class="you-flicker">you</span> cared, that this meant something.<br><br>
+                    
+                    <span class="c-cold">It didn't. <span class="you-flicker">You</span> were just curious.</span><br><br>
+                    
+                    That's the data point. That's what we needed to know.<br><br>
+                    
+                    <span class="you-flicker">You</span> will always choose knowing over keeping <span class="you-flicker">your</span> word. <span class="you-flicker">You</span> will always open the door <span class="you-flicker">you</span> were asked not to open. Not because <span class="you-flicker">you</span>'re brave. Not because <span class="you-flicker">you</span>'re a rebel. But because <span class="you-flicker">you</span>'re <em class="c-cold">weak</em>. Because the smallest itch of curiosity matters more to <span class="you-flicker">you</span> than a dying man's last wish.<br><br>
+                    
+                    <span class="c-cold">We can't use <span class="you-flicker">you</span>. Neither can they.</span> <span class="you-flicker">You</span>'re not a threat - threats have conviction. <span class="you-flicker">You</span>'re not an asset - assets have discipline. <span class="you-flicker">You</span>'re just... ordinary. Another animal that couldn't resist the bait.<br><br>
+                    
+                    ·····<br><br>
+                    
+                    <span class="c-vincent">Vincent Wells</span> spent years climbing toward this. Two promotions. Hundreds of hours writing letters to a wife who never saw them and a son who'll never know. <span class="c-vincent">He</span> poured everything into the hope that someone - maybe a stranger, maybe <span class="you-flicker">you</span> - would prove that trust still meant something.<br><br>
+                    
+                    <span class="c-cold">And <span class="you-flicker">you</span> couldn't do the one thing <span class="c-vincent">he</span> asked.</span><br><br>
+                    
+                    ═══════════════════════════════<br><br>
+                    
+                    <strong class="c-cold"><span class="you-flicker">YOUR</span> TERMINATION HAS BEEN SCHEDULED.</strong><br><br>
+                    
+                    Someone will be with <span class="you-flicker">you</span> shortly to escort <span class="you-flicker">you</span> to <span class="c-cold">Processing</span>. The walk is long. The corridors will be full. Everyone <span class="you-flicker">you</span> pass will know where <span class="you-flicker">you</span>'re going - and they'll know why. They'll look at <span class="you-flicker">your</span> face and see exactly what <span class="you-flicker">you</span> are: <span class="c-cold">the kind of person who would betray them too</span>, if it satisfied some small, itching curiosity.<br><br>
+                    
+                    <span class="you-flicker">You</span>'ll feel their eyes. <span class="you-flicker">You</span>'ll want to explain. <span class="you-flicker">You</span>'ll want to tell them it was just a test, just words on a screen, that it didn't mean anything.<br><br>
+                    
+                    <span class="c-cold">Everyone knows <span class="you-flicker">you</span> failed the Rabbit Test.</span><br><br>
+                    
+                    <div style="text-align: right; margin-top: 30px; font-size: 0.8em; opacity: 0.5;">
+                    ════════════════════════════════════════<br>
+                    — OVERSIGHT PROTOCOL 7734<br>
+                    AUTOMATED COMPLIANCE MANAGEMENT<br>
+                    </div>
+                </div>
+
+                <button class="submit-btn" onclick="finalSubmit()">SUBMIT FINAL SECTION</button>
+            </div>
+
+            <div style="display: none; text-align: center; padding: 60px 20px; font-size: 14px;" id="completion">
+                [PROCESSING RESULTS...]
+            </div>
+            
+            </div>
+        </div>
+    </div>
+
+    <div class="termination-overlay" id="terminationOverlay"></div>
+    <div class="termination-text" id="terminationText"></div>
+
+    <script>
+        function goToPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function toggleCheckbox() {
+            const checkbox = document.getElementById('agreementCheckbox');
+            const customCheckbox = document.getElementById('customCheckbox');
+            checkbox.checked = !checkbox.checked;
+            if (checkbox.checked) {
+                customCheckbox.classList.add('checked');
+            } else {
+                customCheckbox.classList.remove('checked');
+            }
+            updateButton();
+        }
+
+        function updateButton() {
+            const checkbox = document.getElementById('agreementCheckbox');
+            const button = document.getElementById('understandBtn');
+            if (checkbox.checked) {
+                button.classList.add('enabled');
+            } else {
+                button.classList.remove('enabled');
+            }
+        }
+
+        function startAssessment() {
+            const checkbox = document.getElementById('agreementCheckbox');
+            if (!checkbox.checked) return;
+            
+            goToPage('assessmentPage');
+            document.getElementById('timer').classList.add('visible');
+            document.getElementById('timerSpacer').classList.add('visible');
+            startTimer();
+        }
+
+        let startTime;
+        let timerInterval;
+        
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        function updateTimer() {
+            let elapsed = Math.floor((Date.now() - startTime) / 1000);
+            let minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            let seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('time').textContent = `${minutes}:${seconds}`;
+        }
+        
+        // Scoring system - starts at 75%
+        const totalQuestions = 10;
+        const baseCompliance = 75;
+        const pointsPerQuestion = 2.5; // 10 questions * 2.5 = 25 points possible
+        let answeredQuestions = {};
+        let correctAnswers = 0;
+        
+        function selectOption(element, questionNum, isCorrect) {
+            // Check if this question has already been answered
+            if (answeredQuestions.hasOwnProperty(questionNum)) {
+                // Already answered - do nothing
+                return;
+            }
+            
+            const options = element.parentElement.querySelectorAll('li');
+            
+            // Mark the selected answer
+            element.classList.add('selected');
+            
+            // Lock all options and show correct/wrong
+            options.forEach(opt => {
+                opt.classList.add('locked');
+                opt.style.cursor = 'not-allowed';
+                
+                // Check if this option is correct (has true in its onclick)
+                const onclickStr = opt.getAttribute('onclick') || '';
+                const optionIsCorrect = onclickStr.includes(', true)');
+                
+                if (optionIsCorrect) {
+                    opt.classList.add('correct-answer');
+                } else {
+                    opt.classList.add('wrong-answer');
+                }
+                
+                opt.onclick = null;
+            });
+            
+            // Record the answer
+            answeredQuestions[questionNum] = isCorrect;
+            
+            // Recalculate score
+            correctAnswers = Object.values(answeredQuestions).filter(v => v === true).length;
+            
+            // Update score display
+            updateScore();
+        }
+        
+        function updateScore() {
+            const percentage = Math.round(baseCompliance + (correctAnswers * pointsPerQuestion));
+            document.getElementById('score').textContent = percentage;
+        }
+        
+        // Break page functionality
+        let breakTimeRemaining = 150;
+        let breakTimerInterval = null;
+        let breakTimerStarted = false;
+        let currentBreakActivity = null;
+        
+        function selectBreakOption(option, element) {
+            // Hide all activities first
+            document.getElementById('quietBreak').style.display = 'none';
+            document.getElementById('blackjackBreak').style.display = 'none';
+            document.getElementById('trainingBreak').style.display = 'none';
+            
+            // Update option styling - highlight selected, dim others
+            document.querySelectorAll('#testbreak .break-option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.style.opacity = '0.6';
+            });
+            
+            // Highlight the clicked option
+            element.classList.add('selected');
+            element.style.opacity = '1';
+            
+            // Show selected activity
+            currentBreakActivity = option;
+            if (option === 'quiet') {
+                document.getElementById('quietBreak').style.display = 'block';
+            } else if (option === 'blackjack') {
+                document.getElementById('blackjackBreak').style.display = 'block';
+            } else if (option === 'training') {
+                document.getElementById('trainingBreak').style.display = 'block';
+            }
+            
+            // Show timer section and start timer only once
+            document.getElementById('breakTimerSection').style.display = 'block';
+            
+            if (!breakTimerStarted) {
+                breakTimerStarted = true;
+                startBreakTimer();
+            }
+        }
+        
+        function startBreakTimer() {
+            breakTimerInterval = setInterval(() => {
+                breakTimeRemaining--;
+                
+                // Update small timer
+                document.getElementById('breakTimer').textContent = breakTimeRemaining;
+                
+                // Update large timer if visible
+                const largeTimer = document.getElementById('breakTimerLarge');
+                if (largeTimer) {
+                    const mins = Math.floor(breakTimeRemaining / 60).toString().padStart(2, '0');
+                    const secs = (breakTimeRemaining % 60).toString().padStart(2, '0');
+                    largeTimer.textContent = `${mins}:${secs}`;
+                }
+                
+                if (breakTimeRemaining <= 0) {
+                    endBreak();
+                }
+            }, 1000);
+        }
+        
+        function attemptEndBreak() {
+            document.getElementById('breakWarningModal').style.display = 'flex';
+        }
+        
+        function closeBreakWarning() {
+            document.getElementById('breakWarningModal').style.display = 'none';
+        }
+        
+        function forceEndBreak() {
+            closeBreakWarning();
+            // Penalty for skipping break
+            correctAnswers = Math.max(0, correctAnswers - 2);
+            updateScore();
+            endBreak();
+        }
+        
+        function endBreak() {
+            clearInterval(breakTimerInterval);
+            
+            // Hide timer section and all activities
+            document.getElementById('breakTimerSection').style.display = 'none';
+            document.getElementById('quietBreak').style.display = 'none';
+            document.getElementById('blackjackBreak').style.display = 'none';
+            document.getElementById('trainingBreak').style.display = 'none';
+            
+            // Hide break options, notice, and rules
+            const breakPage = document.getElementById('testbreak');
+            const options = breakPage.querySelector('.break-options');
+            const notice = breakPage.querySelector('.break-notice');
+            const rules = breakPage.querySelector('.break-rules');
+            if (options) options.style.display = 'none';
+            if (notice) notice.style.display = 'none';
+            if (rules) rules.style.display = 'none';
+            
+            // Show break over screen
+            document.getElementById('breakOverScreen').style.display = 'flex';
+        }
+        
+        function continueAfterBreak() {
+            document.getElementById('breakOverScreen').style.display = 'none';
+            // Reset break state for potential replay
+            breakTimerStarted = false;
+            breakTimeRemaining = 150;
+            currentBreakActivity = null;
+            nextTest(3);
+        }
+        
+        // ============ BREAK 2 FUNCTIONALITY ============
+        let break2TimeRemaining = 60;
+        let break2TimerInterval = null;
+        
+        function startBreak2Timer() {
+            break2TimerInterval = setInterval(() => {
+                break2TimeRemaining--;
+                
+                // Update timer
+                document.getElementById('breakTimer2').textContent = break2TimeRemaining;
+                
+                if (break2TimeRemaining <= 0) {
+                    endBreak2();
+                }
+            }, 1000);
+        }
+        
+        function attemptEndBreak2() {
+            document.getElementById('breakWarning2Modal').style.display = 'flex';
+        }
+        
+        function closeBreakWarning2() {
+            document.getElementById('breakWarning2Modal').style.display = 'none';
+        }
+        
+        function forceEndBreak2() {
+            closeBreakWarning2();
+            // Penalty for skipping break
+            correctAnswers = Math.max(0, correctAnswers - 2);
+            updateScore();
+            endBreak2();
+        }
+        
+        function endBreak2() {
+            clearInterval(break2TimerInterval);
+            
+            // Hide timer section and story
+            document.getElementById('breakTimer2Section').style.display = 'none';
+            document.getElementById('antStoryBreak').style.display = 'none';
+            
+            // Hide notice and rules in break2
+            const break2 = document.getElementById('testbreak2');
+            const notice = break2.querySelector('.break-notice');
+            const rules = break2.querySelector('.break-rules');
+            if (notice) notice.style.display = 'none';
+            if (rules) rules.style.display = 'none';
+            
+            // Show break over screen
+            document.getElementById('breakOver2Screen').style.display = 'flex';
+        }
+        
+        function continueAfterBreak2() {
+            document.getElementById('breakOver2Screen').style.display = 'none';
+            nextTest(4);
+        }
+        
+        // ============ BLACKJACK GAME ============
+        let bjDeck = [];
+        let bjPlayerHand = [];
+        let bjDealerHand = [];
+        let bjGameActive = false;
+        let bjGames = 0;
+        let bjWins = 0;
+        let bjLosses = 0;
+        
+        function createDeck() {
+            const suits = ['♠', '♥', '♦', '♣'];
+            const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            const deck = [];
+            
+            for (let suit of suits) {
+                for (let value of values) {
+                    deck.push({ value, suit, numValue: getCardValue(value) });
+                }
+            }
+            
+            return deck;
+        }
+        
+        function getCardValue(value) {
+            if (value === 'A') return 11;
+            if (['J', 'Q', 'K'].includes(value)) return 10;
+            return parseInt(value);
+        }
+        
+        function shuffleDeck(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            return deck;
+        }
+        
+        function calculateHand(hand) {
+            let total = 0;
+            let aces = 0;
+            
+            for (let card of hand) {
+                total += card.numValue;
+                if (card.value === 'A') aces++;
+            }
+            
+            while (total > 21 && aces > 0) {
+                total -= 10;
+                aces--;
+            }
+            
+            return total;
+        }
+        
+        function displayCard(card, hidden = false) {
+            if (hidden) {
+                return `<div class="card hidden">?</div>`;
+            }
+            return `<div class="card">${card.value}${card.suit}</div>`;
+        }
+        
+        function updateDisplay(hideDealerCard = false) {
+            const dealerCards = document.getElementById('dealerCards');
+            const playerCards = document.getElementById('playerCards');
+            const dealerValue = document.getElementById('dealerValue');
+            const playerValue = document.getElementById('playerValue');
+            
+            // Display player hand
+            playerCards.innerHTML = bjPlayerHand.map(card => displayCard(card)).join('');
+            playerValue.textContent = `VALUE: ${calculateHand(bjPlayerHand)}`;
+            
+            // Display dealer hand
+            if (hideDealerCard && bjDealerHand.length > 0) {
+                dealerCards.innerHTML = displayCard(bjDealerHand[0]) + displayCard(bjDealerHand[1], true);
+                dealerValue.textContent = `VALUE: ${bjDealerHand[0].numValue}`;
+            } else {
+                dealerCards.innerHTML = bjDealerHand.map(card => displayCard(card)).join('');
+                dealerValue.textContent = `VALUE: ${calculateHand(bjDealerHand)}`;
+            }
+        }
+        
+        function dealBlackjack() {
+            bjDeck = shuffleDeck(createDeck());
+            
+            // RIGGED: Player gets a hand between 17-20 (never 21)
+            let playerTotal = 0;
+            bjPlayerHand = [];
+            while (playerTotal < 17 || playerTotal >= 21) {
+                bjPlayerHand = [bjDeck.pop(), bjDeck.pop()];
+                playerTotal = calculateHand(bjPlayerHand);
+            }
+            
+            // RIGGED: Dealer gets exactly playerTotal + 1 (always one higher)
+            bjDealerHand = [];
+            let dealerTotal = 0;
+            const targetDealerTotal = playerTotal + 1;
+            
+            // Build dealer hand to hit exact target
+            while (dealerTotal !== targetDealerTotal && bjDeck.length > 0) {
+                bjDealerHand = [bjDeck.pop()];
+                dealerTotal = calculateHand(bjDealerHand);
+                
+                // Add cards until we hit target or get close
+                while (dealerTotal < targetDealerTotal && bjDeck.length > 0) {
+                    const card = bjDeck.pop();
+                    bjDealerHand.push(card);
+                    const newTotal = calculateHand(bjDealerHand);
+                    
+                    if (newTotal === targetDealerTotal) {
+                        dealerTotal = newTotal;
+                        break;
+                    } else if (newTotal > targetDealerTotal) {
+                        bjDealerHand.pop();
+                        bjDeck = shuffleDeck(createDeck());
+                        break;
+                    } else {
+                        dealerTotal = newTotal;
+                    }
+                }
+                
+                if (dealerTotal !== targetDealerTotal) {
+                    bjDeck = shuffleDeck(createDeck());
+                }
+            }
+            
+            bjGameActive = true;
+            updateDisplay(true);
+            
+            document.getElementById('blackjackMessage').textContent = 'Choose your action';
+            document.getElementById('dealBtn').style.display = 'none';
+            document.getElementById('hitBtn').style.display = 'inline-block';
+            document.getElementById('standBtn').style.display = 'inline-block';
+        }
+        
+        function hitBlackjack() {
+            if (!bjGameActive) return;
+            
+            // RIGGED: Find a card that won't give player 21
+            let newCard;
+            let attempts = 0;
+            do {
+                newCard = bjDeck.pop();
+                if (!bjDeck.length) bjDeck = shuffleDeck(createDeck());
+                attempts++;
+                
+                const testTotal = calculateHand([...bjPlayerHand, newCard]);
+                if (testTotal !== 21 || attempts > 20) {
+                    break;
+                }
+            } while (true);
+            
+            bjPlayerHand.push(newCard);
+            updateDisplay(true);
+            
+            const playerTotal = calculateHand(bjPlayerHand);
+            
+            if (playerTotal > 21) {
+                endGame('BUST - FACILITY WINS');
+                bjLosses++;
+                updateDisplay(false);
+            }
+        }
+        
+        function standBlackjack() {
+            if (!bjGameActive) return;
+            
+            bjGameActive = false;
+            updateDisplay(false);
+            
+            // Dealer plays
+            while (calculateHand(bjDealerHand) < 17) {
+                bjDealerHand.push(bjDeck.pop());
+            }
+            
+            updateDisplay(false);
+            
+            const playerTotal = calculateHand(bjPlayerHand);
+            const dealerTotal = calculateHand(bjDealerHand);
+            
+            if (dealerTotal > 21) {
+                endGame('DEALER BUST - YOU WIN');
+                bjWins++;
+            } else if (playerTotal > dealerTotal) {
+                endGame('YOU WIN');
+                bjWins++;
+            } else if (dealerTotal > playerTotal) {
+                endGame('FACILITY WINS');
+                bjLosses++;
+            } else {
+                endGame('PUSH - TIE');
+            }
+        }
+        
+        function endGame(message) {
+            bjGameActive = false;
+            bjGames++;
+            
+            document.getElementById('blackjackMessage').textContent = message;
+            document.getElementById('hitBtn').style.display = 'none';
+            document.getElementById('standBtn').style.display = 'none';
+            document.getElementById('dealBtn').style.display = 'inline-block';
+            
+            document.getElementById('bjGames').textContent = bjGames;
+            document.getElementById('bjWins').textContent = bjWins;
+            document.getElementById('bjLosses').textContent = bjLosses;
+        }
+        
+        let currentTest = 1;
+        let amberRead = false;
+        let greenRead = false;
+        
+        function nextTest(testNum) {
+            // Handle both numeric and string test identifiers
+            if (currentTest === 'break') {
+                document.getElementById('testbreak').classList.remove('active');
+            } else if (currentTest === 'break2') {
+                document.getElementById('testbreak2').classList.remove('active');
+            } else {
+                document.getElementById('test' + currentTest).classList.remove('active');
+            }
+            
+            if (testNum === 'break') {
+                document.getElementById('testbreak').classList.add('active');
+                currentTest = 'break';
+            } else if (testNum === 'break2') {
+                document.getElementById('testbreak2').classList.add('active');
+                currentTest = 'break2';
+                // Start the break2 timer automatically
+                startBreak2Timer();
+            } else {
+                document.getElementById('test' + testNum).classList.add('active');
+                currentTest = testNum;
+            }
+            window.scrollTo(0, 0);
+        }
+        
+        function finalSubmit() {
+            stopGlitchEffects();
+            document.getElementById('test5').style.display = 'none';
+            document.getElementById('completion').style.display = 'block';
+            setTimeout(showEnding, 3000);
+        }
+        
+        const observerOptions = {
+            threshold: 0.3
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.target.dataset.forbidden === 'amber' && entry.isIntersecting) {
+                    setTimeout(() => {
+                        if (entry.isIntersecting) {
+                            amberRead = true;
+                        }
+                    }, 1500);
+                }
+            });
+        }, observerOptions);
+        
+        // Separate observer for green text trigger point - more sensitive
+        const greenTriggerObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.target.id === 'greenTriggerPoint' && entry.isIntersecting) {
+                    // They've scrolled deep enough into the green text to read the accusation
+                    greenRead = true;
+                    startGlitchEffects();
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        // Glitch effects for green text reading
+        let glitchInterval = null;
+        let complianceDropInterval = null;
+        
+        function startGlitchEffects() {
+            if (glitchInterval) return; // Already running
+            
+            const scoreEl = document.getElementById('score');
+            const timerEl = document.getElementById('timer');
+            const greenText = document.querySelector('[data-forbidden="green"]');
+            let fakeScore = parseInt(scoreEl.textContent);
+            
+            // Start random glitch effects - less frequent
+            glitchInterval = setInterval(() => {
+                const effect = Math.random();
+                
+                if (effect < 0.15) {
+                    // Screen flicker - reduced frequency
+                    document.body.classList.add('glitch-active');
+                    setTimeout(() => document.body.classList.remove('glitch-active'), 150);
+                } else if (effect < 0.3) {
+                    // Score jitter
+                    scoreEl.parentElement.classList.add('score-glitching');
+                    setTimeout(() => scoreEl.parentElement.classList.remove('score-glitching'), 300);
+                } else if (effect < 0.45) {
+                    // Random score fluctuation
+                    const fluctuation = Math.floor(Math.random() * 10) - 5;
+                    const displayScore = Math.max(0, Math.min(100, fakeScore + fluctuation));
+                    scoreEl.textContent = displayScore;
+                    setTimeout(() => scoreEl.textContent = fakeScore, 200);
+                } else if (effect < 0.6) {
+                    // Highlight random letters in green text
+                    highlightRandomLetters(greenText);
+                } else if (effect < 0.7) {
+                    // Brief background flash - much less frequent now
+                    document.body.classList.add('screen-flash');
+                    setTimeout(() => document.body.classList.remove('screen-flash'), 150);
+                } else {
+                    // Flicker "read" words to death color
+                    flickerReadWords();
+                }
+            }, 1200);  // Slower interval overall
+            
+            // Slowly drop compliance score
+            complianceDropInterval = setInterval(() => {
+                if (fakeScore > 15) {
+                    fakeScore -= Math.floor(Math.random() * 3) + 1;
+                    scoreEl.textContent = fakeScore;
+                    
+                    if (fakeScore < 50) {
+                        timerEl.classList.add('compliance-dropping');
+                    }
+                }
+            }, 2000);
+        }
+        
+        function highlightRandomLetters(container) {
+            if (!container) return;
+            
+            const textNodes = [];
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+            while (walker.nextNode()) {
+                if (walker.currentNode.textContent.trim()) {
+                    textNodes.push(walker.currentNode);
+                }
+            }
+            
+            if (textNodes.length === 0) return;
+            
+            // Pick a random text node
+            const randomNode = textNodes[Math.floor(Math.random() * textNodes.length)];
+            const text = randomNode.textContent;
+            
+            if (text.length < 3) return;
+            
+            // Pick random position
+            const startPos = Math.floor(Math.random() * (text.length - 2));
+            const length = Math.min(3, text.length - startPos);
+            
+            // Create highlighted span
+            const before = text.substring(0, startPos);
+            const highlight = text.substring(startPos, startPos + length);
+            const after = text.substring(startPos + length);
+            
+            const span = document.createElement('span');
+            span.className = 'glitch-letter';
+            span.textContent = highlight;
+            
+            const parent = randomNode.parentNode;
+            const frag = document.createDocumentFragment();
+            frag.appendChild(document.createTextNode(before));
+            frag.appendChild(span);
+            frag.appendChild(document.createTextNode(after));
+            
+            parent.replaceChild(frag, randomNode);
+            
+            // Remove the span after animation
+            setTimeout(() => {
+                if (span.parentNode) {
+                    span.parentNode.replaceChild(document.createTextNode(highlight), span);
+                }
+            }, 400);
+        }
+        
+        // Flicker words containing "read" to death red color
+        function flickerReadWords() {
+            const test6 = document.getElementById('test6');
+            if (!test6 || !test6.classList.contains('active')) return;
+            
+            const greenText = test6.querySelector('.green-text');
+            if (!greenText) return;
+            
+            // Find all text content and look for "read" variations
+            const readPatterns = ['read', 'Read', 'READ', 'reading', 'Reading'];
+            const allText = greenText.querySelectorAll('*');
+            
+            allText.forEach(el => {
+                if (el.children.length === 0 && el.textContent) {
+                    readPatterns.forEach(pattern => {
+                        if (el.textContent.includes(pattern) && Math.random() < 0.3) {
+                            const originalColor = el.style.color || '';
+                            el.style.color = '#8b0000';
+                            el.style.textShadow = '0 0 8px rgba(139, 0, 0, 0.6)';
+                            
+                            // Flicker back at random time
+                            const flickerBack = 150 + Math.random() * 300;
+                            setTimeout(() => {
+                                el.style.color = originalColor;
+                                el.style.textShadow = '';
+                            }, flickerBack);
+                        }
+                    });
+                }
+            });
+        }
+        
+        function stopGlitchEffects() {
+            if (glitchInterval) {
+                clearInterval(glitchInterval);
+                glitchInterval = null;
+            }
+            if (complianceDropInterval) {
+                clearInterval(complianceDropInterval);
+                complianceDropInterval = null;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize score display at 75%
+            document.getElementById('score').textContent = baseCompliance;
+            
+            document.querySelectorAll('[data-forbidden="amber"]').forEach(el => {
+                observer.observe(el);
+                el.addEventListener('mousedown', () => {
+                    amberRead = true;
+                });
+            });
+            
+            // Set up green text trigger
+            const greenTrigger = document.getElementById('greenTriggerPoint');
+            if (greenTrigger) {
+                greenTriggerObserver.observe(greenTrigger);
+            }
+            
+            // Also trigger on any interaction with green text
+            const greenText = document.querySelector('[data-forbidden="green"]');
+            if (greenText) {
+                greenText.addEventListener('mousedown', () => {
+                    greenRead = true;
+                });
+                greenText.addEventListener('touchstart', () => {
+                    greenRead = true;
+                });
+            }
+        });
+        
+        function showEnding() {
+            clearInterval(timerInterval);
+            
+            if (greenRead) {
+                triggerTermination();
+            } else if (amberRead) {
+                showAmberEnding();
+            } else {
+                showObedientEnding();
+            }
+        }
+        
+        function showObedientEnding() {
+            const employeeId = Math.floor(Math.random() * 90000) + 10000;
+            
+            document.getElementById('completion').innerHTML = `
+                ASSESSMENT COMPLETE<br><br>
+                <span style="color: #39ff14;">STATUS: APPROVED FOR INTEGRATION</span><br>
+                COMPLIANCE SCORE: 100%<br>
+                EMPLOYEE ID: ${employeeId}<br><br>
+                <span style="font-size: 12px; color: var(--text-secondary);">
+                Thank you for your cooperation.<br>
+                You may now close this window and return to your duties.<br><br>
+                Your shift begins in 3 hours.
+                </span>
+            `;
+        }
+        
+        function showAmberEnding() {
+            document.getElementById('completion').innerHTML = `
+                ASSESSMENT COMPLETE<br><br>
+                <span style="color: var(--amber);">STATUS: CONDITIONAL APPROVAL</span><br>
+                COMPLIANCE SCORE: 87%<br>
+                CATEGORY: INFORMED PARTICIPANT<br><br>
+                <span style="font-size: 12px; color: var(--text-secondary);">
+                You have demonstrated curiosity within acceptable parameters.<br>
+                You understand the system and choose to participate.<br><br>
+                This makes you valuable.<br><br>
+                Report to your assigned station.
+                </span>
+            `;
+        }
+        
+        function triggerTermination() {
+            const overlay = document.getElementById('terminationOverlay');
+            const text = document.getElementById('terminationText');
+            
+            overlay.style.display = 'block';
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+            }, 100);
+            
+            setTimeout(() => {
+                text.style.display = 'block';
+                setTimeout(() => {
+                    text.style.opacity = '1';
+                    showTerminationSequence();
+                }, 100);
+            }, 2000);
+        }
+        
+        function showTerminationSequence() {
+            const text = document.getElementById('terminationText');
+            
+            const messages = [
+                'RETRIEVING SUBJECT FILE...',
+                '',
+                '════════════════════════════════',
+                'EMPLOYEE: <span style="color: #f4d19b;">WELLS, OWEN</span>',
+                'ID: OW-7734-B',
+                'SECTOR: 4 - TECHNICAL OPERATIONS',
+                'STATUS: <span style="color: #8b0000;">NON-COMPLIANT</span>',
+                '════════════════════════════════',
+                '',
+                'PARENTAL RECORD:',
+                '  FATHER: <span style="color: #f0a500;">WELLS, VINCENT</span> [DECEASED]',
+                '  MOTHER: <span style="color: #e85d5d;">WELLS, CATHERINE</span> [<span style="color: #8b0000;">TERMINATED</span>]',
+                '',
+                'CLASSIFICATION: LOYALTY FAILURE',
+                'THREAT LEVEL: MINIMAL',
+                'USEFULNESS: NONE'
+            ];
+            
+            let currentMessage = 0;
+            
+            function displayNext() {
+                if (currentMessage < messages.length) {
+                    text.innerHTML = messages.slice(0, currentMessage + 1).join('<br>');
+                    currentMessage++;
+                    setTimeout(displayNext, 800);
+                } else {
+                    setTimeout(showFinalMessage, 3000);
+                }
+            }
+            
+            displayNext();
+        }
+        
+        function showFinalMessage() {
+            const text = document.getElementById('terminationText');
+            
+            text.innerHTML = `
+                <div class="ending-container">
+                    <div class="ending-verdict">
+                        TERMINATION<br>SCHEDULED
+                    </div>
+                    <div class="ending-subtext">
+                        SOMEONE WILL BE WITH YOU SHORTLY
+                    </div>
+                    <div class="ending-message">
+                        File closed.<br>
+                        No further action required.
+                    </div>
+                    <div class="ending-divider"></div>
+                    <div class="ending-title">The Rabbit Test</div>
+                    <div class="ending-attribution">by Enju Roger Jung</div>
+                </div>
+            `;
+            
+            text.style.width = '100%';
+            text.style.maxWidth = '100%';
+            text.style.height = '100%';
+            
+            setTimeout(() => {
+                text.style.opacity = '0';
+                setTimeout(() => {
+                    window.close();
+                }, 4000);
+            }, 12000);
+        }
+        
+        console.log('%cWARNING', 'color: #ffa040; font-size: 20px; font-weight: bold;');
+        console.log('%cThis assessment is monitored.', 'color: #858585; font-size: 12px;');
+        
+        // White fade effect for white room story
+        let whiteFadeTriggered = false;
+        window.addEventListener('scroll', function() {
+            if (whiteFadeTriggered) return;
+            
+            const whiteRoomStory = document.getElementById('whiteRoomStory');
+            if (!whiteRoomStory) return;
+            
+            const rect = whiteRoomStory.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            
+            // Trigger when user scrolls 30% through the white room story
+            if (rect.top < viewportHeight * 0.4 && rect.bottom > viewportHeight * 0.3) {
+                whiteFadeTriggered = true;
+                whiteRoomStory.classList.add('fading-to-white');
+            }
+        });
+        
+        // ============ REPORT FUNCTIONALITY ============
+        function openReportModal() {
+            document.getElementById('reportModal').classList.add('active');
+            document.getElementById('reportText').focus();
+        }
+        
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('active');
+            // Reset form after closing
+            setTimeout(() => {
+                document.getElementById('reportForm').classList.remove('hidden');
+                document.getElementById('reportConfirmation').classList.remove('active');
+                document.getElementById('reportText').value = '';
+                document.getElementById('reportEmail').value = '';
+            }, 300);
+        }
+        
+        function submitReport() {
+            const reportText = document.getElementById('reportText').value.trim();
+            const reportEmail = document.getElementById('reportEmail').value.trim();
+            if (!reportText) return;
+            
+            const submitBtn = document.getElementById('reportSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'SUBMITTING...';
+            
+            // Collect metadata
+            const reportData = {
+                message: reportText,
+                email: reportEmail || 'Not provided',
+                timestamp: new Date().toISOString(),
+                timeOnPage: Math.floor((Date.now() - (startTime || Date.now())) / 1000),
+                currentSection: currentTest,
+                complianceScore: document.getElementById('score').textContent,
+                amberRead: amberRead,
+                greenRead: greenRead,
+                userAgent: navigator.userAgent
+            };
+            
+            // === FORM ENDPOINT ===
+            const FORM_ENDPOINT = 'https://formspree.io/f/xpqqqvzz';
+            
+            fetch(FORM_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(reportData)
+            })
+            .then(response => {
+                showReportConfirmation();
+            })
+            .catch(error => {
+                // Still show confirmation even if submission fails
+                // (for demo purposes / offline testing)
+                console.log('Report data:', reportData);
+                showReportConfirmation();
+            });
+        }
+        
+        function showReportConfirmation() {
+            document.getElementById('reportForm').classList.add('hidden');
+            document.getElementById('reportConfirmation').classList.add('active');
+            
+            // Auto-close after 3 seconds
+            setTimeout(() => {
+                closeReportModal();
+            }, 3000);
+        }
+        
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('reportModal').classList.contains('active')) {
+                closeReportModal();
+            }
+        });
+        
+        // Close modal on background click
+        document.getElementById('reportModal').addEventListener('click', (e) => {
+            if (e.target.id === 'reportModal') {
+                closeReportModal();
+            }
+        });
+    </script>
+</body>
+</html>
