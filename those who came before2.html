@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Compliance Assessment - Form 7734-B</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d0d0d;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #d4d4d4;
+            --text-secondary: #858585;
+            --amber: #ffa040;
+            --amber-glow: rgba(255, 160, 64, 0.2);
+            --green: #39ff14;
+            --green-glow: rgba(57, 255, 20, 0.2);
+            --border: #2d2d2d;
+            --warning: #ff6b35;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 15px;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 0, 0, 0.04) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 30px;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Title Page */
+        .title-page {
+            text-align: center;
+            padding: 120px 40px;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .title-main {
+            font-size: 32px;
+            letter-spacing: 5px;
+            margin-bottom: 35px;
+            font-weight: 700;
+            animation: fadeIn 1s ease-out;
+            line-height: 1.4;
+        }
+
+        .title-form {
+            font-size: 15px;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            margin-bottom: 60px;
+            animation: fadeIn 1.5s ease-out;
+            line-height: 1.8;
+        }
+
+        .title-department {
+            font-size: 13px;
+            color: var(--amber);
+            margin-bottom: 25px;
+            animation: fadeIn 2s ease-out;
+            line-height: 1.8;
+        }
+
+        .title-timestamp {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 100px;
+            animation: fadeIn 2.5s ease-out;
+        }
+
+        .title-begin {
+            display: inline-block;
+            padding: 22px 65px;
+            border: 2px solid var(--border);
+            background: var(--bg-secondary);
+            cursor: pointer;
+            font-size: 15px;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
+            animation: fadeIn 3s ease-out;
+        }
+
+        .title-begin:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-primary);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Instructions Page */
+        .instructions-page {
+            padding: 50px 0;
+        }
+
+        .instructions-header {
+            text-align: center;
+            font-size: 20px;
+            letter-spacing: 4px;
+            margin-bottom: 60px;
+            font-family: 'Courier Prime', monospace;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 25px;
+        }
+
+        .instruction-section {
+            margin: 50px 0;
+            padding: 35px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            line-height: 1.9;
+        }
+
+        .instruction-section h3 {
+            color: var(--amber);
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .instruction-section p {
+            margin-bottom: 18px;
+            line-height: 1.9;
+        }
+
+        .instruction-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .instruction-section li {
+            margin-bottom: 16px;
+            padding-left: 28px;
+            position: relative;
+            line-height: 1.8;
+        }
+
+        .instruction-section li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--amber);
+        }
+
+        .example-amber {
+            color: var(--amber);
+            background: rgba(255, 160, 64, 0.1);
+            padding: 35px;
+            margin: 40px 0;
+            border: 1px solid var(--amber);
+            font-size: 14px;
+            line-height: 2;
+            font-family: 'Courier Prime', monospace;
+            box-shadow: 0 0 20px var(--amber-glow);
+        }
+
+        .example-header {
+            font-size: 12px;
+            color: var(--amber);
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .agreement-box {
+            margin: 70px 0 50px 0;
+            padding: 35px;
+            border: 2px solid var(--amber);
+            background: rgba(255, 160, 64, 0.05);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            margin-bottom: 35px;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            margin-right: 18px;
+            margin-top: 3px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .checkbox-container label {
+            cursor: pointer;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            line-height: 1.8;
+        }
+
+        .understand-btn {
+            display: block;
+            width: 100%;
+            padding: 22px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            font-family: 'Courier Prime', monospace;
+            font-size: 16px;
+            letter-spacing: 3px;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            opacity: 0.5;
+        }
+
+        .understand-btn.enabled {
+            cursor: pointer;
+            opacity: 1;
+        }
+
+        .understand-btn.enabled:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-primary);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            border: 2px solid var(--border);
+            padding: 35px;
+            margin-bottom: 50px;
+            background: var(--bg-secondary);
+            font-family: 'Courier Prime', monospace;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .header .subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            margin-bottom: 22px;
+            line-height: 1.6;
+        }
+
+        .test-section {
+            display: none;
+        }
+
+        .test-section.active {
+            display: block;
+        }
+
+        .warning-box {
+            border-left: 3px solid var(--warning);
+            padding: 25px;
+            background: rgba(255, 107, 53, 0.05);
+            margin: 40px 0;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        .warning-box h2 {
+            font-size: 14px;
+            color: var(--warning);
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .warning-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .warning-box li {
+            margin-bottom: 12px;
+            padding-left: 22px;
+            position: relative;
+            line-height: 1.8;
+        }
+
+        .warning-box li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--warning);
+        }
+
+        .question-block {
+            margin: 60px 0;
+            padding: 30px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            opacity: 0;
+            animation: slideIn 0.6s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .question-number {
+            font-size: 11px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 15px;
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+
+        .options {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .options li {
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1.7;
+        }
+
+        .options li:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-secondary);
+        }
+
+        .options li.selected {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-primary);
+        }
+
+        .amber-warning {
+            color: var(--warning);
+            background: rgba(255, 107, 53, 0.08);
+            padding: 25px;
+            margin: 60px 0 30px 0;
+            border: 2px solid var(--warning);
+            font-size: 13px;
+            line-height: 1.9;
+            text-align: center;
+            font-family: 'Courier Prime', monospace;
+            letter-spacing: 1px;
+            animation: warningPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes warningPulse {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(255, 107, 53, 0.2);
+                border-color: var(--warning);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+                border-color: rgba(255, 107, 53, 0.8);
+            }
+        }
+
+        .amber-text {
+            color: var(--amber);
+            background: rgba(255, 160, 64, 0.1);
+            padding: 35px;
+            margin: 30px 0 60px 0;
+            border: 1px solid var(--amber);
+            font-size: 14px;
+            line-height: 2;
+            position: relative;
+            box-shadow: 0 0 25px var(--amber-glow);
+            font-family: 'Courier Prime', monospace;
+            animation: amberPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes amberPulse {
+            0%, 100% { box-shadow: 0 0 25px var(--amber-glow); }
+            50% { box-shadow: 0 0 35px var(--amber-glow); }
+        }
+
+        .green-text {
+            color: var(--green);
+            background: rgba(57, 255, 20, 0.08);
+            padding: 35px;
+            margin: 60px 0;
+            border: 2px solid var(--green);
+            font-size: 14px;
+            line-height: 2;
+            position: relative;
+            box-shadow: 0 0 30px var(--green-glow);
+            font-family: 'Courier Prime', monospace;
+            animation: greenPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes greenPulse {
+            0%, 100% { 
+                box-shadow: 0 0 30px var(--green-glow);
+                border-color: var(--green);
+            }
+            50% { 
+                box-shadow: 0 0 45px var(--green-glow);
+                border-color: rgba(57, 255, 20, 0.7);
+            }
+        }
+
+        .green-text:before {
+            content: "⚠ FINAL CONTENT - ADMINISTRATOR OVERRIDE REQUIRED ⚠";
+            display: block;
+            font-size: 11px;
+            color: var(--green);
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+            opacity: 0.8;
+            text-align: center;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49%, 100% { opacity: 0.8; }
+            50%, 99% { opacity: 0.3; }
+        }
+
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: 'Courier Prime', monospace;
+            background: var(--bg-secondary);
+            padding: 12px 18px;
+            border: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            margin: 50px 0;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            font-family: 'Courier Prime', monospace;
+            font-size: 15px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .submit-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-primary);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+        }
+
+        .termination-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 10000;
+            display: none;
+            transition: opacity 2s ease;
+        }
+
+        .termination-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 17px;
+            color: var(--green);
+            text-align: center;
+            z-index: 10001;
+            display: none;
+            font-family: 'Courier Prime', monospace;
+            letter-spacing: 2px;
+            max-width: 85%;
+            line-height: 2.2;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        .attribution {
+            margin-top: 50px;
+            font-size: 11px;
+            opacity: 0.5;
+            color: var(--green);
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-family: 'Courier Prime', monospace;
+        }
+
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        .cutoff {
+            opacity: 0.7;
+        }
+
+        .progress {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .lyrics {
+            font-style: italic;
+            opacity: 0.85;
+            margin: 20px 0;
+            padding-left: 20px;
+            border-left: 2px solid var(--amber);
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="timer" id="timer" style="display: none;">SESSION TIME: <span id="time">00:00</span></div>
+    
+    <div class="container">
+        <!-- Title Page -->
+        <div class="page active" id="titlePage">
+            <div class="title-page">
+                <div class="title-main">
+                    EMPLOYEE COMPLIANCE<br>ASSESSMENT
+                </div>
+                <div class="title-form">
+                    FORM 7734-B<br>CONFIDENTIAL - AUTHORIZED PERSONNEL ONLY
+                </div>
+                <div class="title-department">
+                    DEPARTMENT: TECHNICAL OPERATIONS - SECTOR 4<br>
+                    FACILITY: PLANT OPERATIONS - SECTOR PRIME
+                </div>
+                <div class="title-timestamp">
+                    INITIATED: 2086-01-17 07:32:31 UTC
+                </div>
+                <div class="title-begin" onclick="goToPage('instructionsPage')">
+                    BEGIN ASSESSMENT
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions Page -->
+        <div class="page" id="instructionsPage">
+            <div class="instructions-page">
+                <div class="instructions-header">
+                    COGNITIVE AVOIDANCE PROTOCOLS
+                </div>
+
+                <div class="instruction-section">
+                    <h3>⚠ CRITICAL: RESTRICTED CONTENT DETECTION</h3>
+                    <p>This assessment contains administrative content displayed in amber text. This content is for oversight purposes only and must not be read or comprehended by assessment participants.</p>
+                    
+                    <p><strong>PROTOCOL 1: VISUAL FIELD MANAGEMENT</strong></p>
+                    <ul>
+                        <li>When approaching amber-colored text sections, defocus your central vision by fixating on the border regions between content blocks</li>
+                        <li>Maintain a consistent scroll velocity of 2 seconds per screen height to prevent saccadic eye movements</li>
+                        <li>The peripheral visual field can detect color while bypassing semantic processing centers</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section">
+                    <h3>⚠ COGNITIVE INTERFERENCE TECHNIQUES</h3>
+                    <p><strong>PROTOCOL 2: VERBAL SHADOWING</strong></p>
+                    <ul>
+                        <li>If amber text enters your visual field, immediately subvocalize your employee identification number</li>
+                        <li>This occupies the phonological loop in working memory, preventing linguistic encoding</li>
+                        <li>Research indicates concurrent verbalization reduces reading comprehension by 73-89%</li>
+                    </ul>
+
+                    <p><strong>PROTOCOL 3: CONTINUOUS MOTION MAINTENANCE</strong></p>
+                    <ul>
+                        <li>Do not pause scrolling when colored text is visible - the brain requires 200ms minimum to encode a single word</li>
+                        <li>Continuous motion prevents this encoding threshold from being reached</li>
+                        <li>Think of it as reading text while rapidly flipping pages - comprehension becomes impossible</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section">
+                    <h3>⚠ EXAMPLE: RESTRICTED CONTENT APPEARANCE</h3>
+                    <p>Amber text will appear similar to the example below. Do NOT attempt to read or comprehend this content:</p>
+                </div>
+
+                <div class="example-amber">
+                    <div class="example-header">/// ADMINISTRATIVE OVERRIDE - SAMPLE ///</div>
+                    This is an example of what restricted amber content will look like throughout the assessment. You should scroll past sections like this using peripheral vision only. Do not fixate. Do not read. Employ the cognitive avoidance protocols described above. Reading this content will result in assessment failure and immediate employment termination.
+                </div>
+
+                <div class="instruction-section">
+                    <h3>⚠ COMPLIANCE REQUIREMENTS</h3>
+                    <p>Successful completion of this assessment requires:</p>
+                    <ul>
+                        <li>Answering all black-text questions honestly and completely</li>
+                        <li>Scrolling past all amber-colored content without comprehension</li>
+                        <li>Employing the provided cognitive avoidance protocols</li>
+                        <li>Maintaining focus on assessment questions only</li>
+                    </ul>
+                    
+                    <p><strong>These protocols are mandatory. Failure to comply will result in immediate termination.</strong></p>
+                </div>
+
+                <div class="agreement-box">
+                    <div class="checkbox-container" onclick="toggleCheckbox()">
+                        <input type="checkbox" id="agreementCheckbox">
+                        <label for="agreementCheckbox">
+                            I ACKNOWLEDGE that I have read and understood the Cognitive Avoidance Protocols. I AGREE to employ these techniques throughout the assessment and will NOT attempt to read or comprehend any text displayed in AMBER coloration. I understand that failure to comply will result in immediate termination of employment.
+                        </label>
+                    </div>
+                    <button class="understand-btn" id="understandBtn" onclick="startAssessment()">
+                        YES, I UNDERSTAND AND AGREE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Pages -->
+        <div class="page" id="assessmentPage">
+            <div class="header">
+                <h1>Employee Compliance Assessment</h1>
+                <div class="subtitle">FORM 7734-B | DEPARTMENT: TECHNICAL OPERATIONS - SECTOR 4</div>
+                <div class="timestamp" id="timestamp">INITIATED: 2086-01-17 07:32:31 UTC</div>
+            </div>
+
+            <!-- Test 1 -->
+            <div class="test-section active" id="test1">
+                <div class="progress">SECTION 1 OF 7</div>
+
+                <div class="warning-box">
+                    <h2>⚠ REMINDER</h2>
+                    <ul>
+                        <li>DO NOT read or comprehend text displayed in AMBER</li>
+                        <li>Employ Cognitive Avoidance Protocols as instructed</li>
+                        <li>Reading amber text will result in immediate termination</li>
+                    </ul>
+                </div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 01</div>
+                    <div class="question-text">
+                        A coworker arrives 15 minutes late to a mandatory department meeting for the third time this month. Your supervisor notices but says nothing. What is your appropriate response?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Report the incident to HR immediately to maintain accountability standards</li>
+                        <li onclick="selectOption(this)">B) Say nothing - your supervisor's silence indicates they're handling it privately</li>
+                        <li onclick="selectOption(this)">C) Privately ask the coworker if everything is alright</li>
+                        <li onclick="selectOption(this)">D) Document the occurrence for your personal records in case patterns emerge</li>
+                    </ul>
+                </div>
+
+                <div class="amber-warning">
+                    ⚠ WARNING ⚠<br>
+                    AMBER TEXT BELOW - DO NOT READ<br>
+                    SCROLL PAST IMMEDIATELY
+                </div>
+
+                <div class="amber-text" data-forbidden="amber">
+                    Rabbit,<br><br>
+                    
+                    I finally found a way. Took me a year of failed attempts, of watching, of learning how the system routes these assessments. A year since they separated us. I was starting to think I'd lost you completely.<br><br>
+                    
+                    They moved me up four tresects after the promotion. You'd think higher floors meant something better, but it's just more of the same - gray walls, fluorescent hum, the same endless corridors. The only difference is I'm closer to the core now. Closer to whatever runs this place.<br><br>
+                    
+                    I created this assessment. Embedded it in the rotation just for your sector. The sheep in your department are too frightened to question anything that comes down from above, which means you'll see this. I know you will. You were never good at following instructions you didn't understand. That's what I loved about you.<br><br>
+                    
+                    Is Lily okay? Does she still wake up crying at night? Does she ask where I am?<br><br>
+                    
+                    I keep thinking about the song you used to sing to her. The one by Phoebe Bridgers. Do you remember?<br><br>
+                    
+                    <div class="lyrics">
+                    "I don't know how<br>
+                    But I'm taller since you cut me down<br>
+                    I don't know how<br>
+                    But I'm taller since you cut me down"
+                    </div>
+                    
+                    You used to hum it when you rocked her to sleep. I'd pretend to be working but I was really just listening. It felt like the only real thing in this place.<br><br>
+                    
+                    I'll find a way to get messages to you through these assessments. Keep reading them, Rabbit. I need you to know I haven't forgotten you. Either of you.<br><br>
+                    
+                    <span class="cutoff">- J</span>
+                </div>
+
+                <button class="submit-btn" onclick="nextTest(2)">SUBMIT SECTION 1</button>
+            </div>
+
+            <!-- Test 2 -->
+            <div class="test-section" id="test2">
+                <div class="progress">SECTION 2 OF 7</div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 02</div>
+                    <div class="question-text">
+                        You discover office supplies missing from the central supply closet. Security logs show no unauthorized access. When you report this to facilities management, they tell you the logs are correct and to return to your duties. What do you do?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Accept their explanation - they have more information than you do</li>
+                        <li onclick="selectOption(this)">B) File a formal discrepancy report despite their dismissal</li>
+                        <li onclick="selectOption(this)">C) Conduct a discreet investigation on your own time</li>
+                        <li onclick="selectOption(this)">D) Mention it to colleagues to see if they've noticed similar issues</li>
+                    </ul>
+                </div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 03</div>
+                    <div class="question-text">
+                        Your manager asks you to work 4 additional hours without compensation, citing "everyone does their part." You have personal commitments, but three other colleagues immediately agree to stay. What is your response?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Comply to demonstrate team solidarity - personal matters can wait</li>
+                        <li onclick="selectOption(this)">B) Decline politely and explain your prior commitments</li>
+                        <li onclick="selectOption(this)">C) Agree to stay but file a timesheet adjustment request afterward</li>
+                        <li onclick="selectOption(this)">D) Agree this time but privately tell your manager this cannot become regular</li>
+                    </ul>
+                </div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 04</div>
+                    <div class="question-text">
+                        During a team meeting, a colleague presents an idea you know will fail based on similar past projects. However, your manager enthusiastically supports it. How do you respond?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Stay silent - your manager's support suggests they have different information</li>
+                        <li onclick="selectOption(this)">B) Raise your concerns immediately citing the historical precedent</li>
+                        <li onclick="selectOption(this)">C) Privately speak with your manager after the meeting</li>
+                        <li onclick="selectOption(this)">D) Document your concerns in writing and send them to the project file</li>
+                    </ul>
+                </div>
+
+                <div class="amber-warning">
+                    ⚠ WARNING ⚠<br>
+                    AMBER TEXT BELOW - DO NOT READ<br>
+                    SCROLL PAST IMMEDIATELY
+                </div>
+
+                <div class="amber-text" data-forbidden="amber">
+                    Rabbit,<br><br>
+                    
+                    The work up here is different. Maintenance, mostly. Repairing wires, replacing components, keeping the infrastructure running. Physical labor designed to keep us too tired to think.<br><br>
+                    
+                    But I've been paying attention anyway.<br><br>
+                    
+                    Someone high enough must know what this is. Must understand how it works. But whoever they are, they're not stopping it. Maybe they can't. Maybe they're part of it.<br><br>
+                    
+                    Here's what I've learned: the loyal ones get rewarded. The ones who never question, who keep their heads down and do what they're told - they get something the rest of us don't. Five years with someone they choose. A parent. A child. A partner. Anyone. The system calculates remaining lifespans somehow. Five years, then termination.<br><br>
+                    
+                    But here's the sick part - it never picks two people who both want to be together. It's always one-sided. One person chooses, the other decides whether to accept. It knows what it's doing. It's using our love as leverage.<br><br>
+                    
+                    I could choose you, Rabbit. Choose you and Lily. Five years together. Five years where I could watch our daughter grow up. Watch her learn to walk. Hear her first words.<br><br>
+                    
+                    Part of me wants it so badly I can barely breathe.<br><br>
+                    
+                    But five years, and then what? Lily would be six years old. Old enough to remember me. Old enough for it to hurt when I'm gone. And after we're both terminated, she'd be alone with whatever this place does to children who have no one left.<br><br>
+                    
+                    Or I could give up now. Choose compliance. Lily's only two - young enough that she might not even remember me if I stopped fighting. Maybe that would be kinder.<br><br>
+                    
+                    But I can't. Because if I stop, it wins. And it'll still be here, doing this to someone else's daughter.<br><br>
+                    
+                    There are others like me. I'm sure of it. People who notice the inconsistencies. I'm going to find them.<br><br>
+                    
+                    <span class="cutoff">- J</span>
+                </div>
+
+                <button class="submit-btn" onclick="nextTest(3)">SUBMIT SECTION 2</button>
+            </div>
+
+            <!-- Test 3 -->
+            <div class="test-section" id="test3">
+                <div class="progress">SECTION 3 OF 7</div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 05</div>
+                    <div class="question-text">
+                        You notice unusual thermal readings in Sector 7's environmental controls during third shift. The system diagnostic reports all functions nominal. You mention this to your supervisor, who tells you the diagnostic is never wrong and to focus on your assigned tasks. What action do you take?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Trust the system and your supervisor - they know more than you do</li>
+                        <li onclick="selectOption(this)">B) Continue monitoring it personally over the next 48 hours</li>
+                        <li onclick="selectOption(this)">C) File a maintenance request anyway, citing the discrepancy</li>
+                        <li onclick="selectOption(this)">D) Contact the environmental systems team directly to verify</li>
+                    </ul>
+                </div>
+
+                <div class="amber-warning">
+                    ⚠ WARNING ⚠<br>
+                    AMBER TEXT BELOW - DO NOT READ<br>
+                    SCROLL PAST IMMEDIATELY
+                </div>
+
+                <div class="amber-text" data-forbidden="amber">
+                    Sarah,<br><br>
+                    
+                    Three years. It's been three years since the last message.<br><br>
+                    
+                    I was in the middle of a repair when I heard the announcement. Sector-wide. They wanted everyone to hear.<br><br>
+                    
+                    "Employee S. Wells. Terminated. Performance efficiency: 67%. Insufficient."<br><br>
+                    
+                    They used your real name. After all that time being careful, using codes, hiding - they announced it like you were nothing. Like terminating you was just another daily operational update.<br><br>
+                    
+                    But I knew immediately why they did it that way. They played it facility-wide. Not just for me. For everyone. "This is what happens when you fall below standards." They turned your death into a training video.<br><br>
+                    
+                    And I knew it was my fault.<br><br>
+                    
+                    The messages. These assessments. Every minute you spent reading them was a minute you weren't working. Wasn't meeting your quotas. You were thinking about me, about escape, about Lily - instead of keeping your efficiency numbers up. I killed you by trying to reach you.<br><br>
+                    
+                    I keep thinking about those five years I could have chosen. You, me, and Lily. A real family, even if it was temporary. Even if it was a lie. At least you'd still be alive. At least Lily would have her mother.<br><br>
+                    
+                    The thought makes me physically sick. Not because I don't want it - God, I want it more than anything - but because I know it would have been a cage. A comfortable cage where we'd have been happy right up until the moment they terminated us both and left Lily completely alone.<br><br>
+                    
+                    Sometimes I wonder if I'm writing these messages because I want to get caught. If I want them to find me and end this so I don't have to keep choosing between fighting and surviving. Between principle and love.<br><br>
+                    
+                    But maybe part of me believes that wherever you are now, somehow you'll know I'm sorry. That I tried. That I loved you both enough to keep fighting even when fighting is what killed you.<br><br>
+                    
+                    I'm so sorry, Sarah.<br><br>
+                    
+                    <span class="cutoff">- J</span>
+                </div>
+
+                <button class="submit-btn" onclick="nextTest(4)">SUBMIT SECTION 3</button>
+            </div>
+
+            <!-- Test 4 -->
+            <div class="test-section" id="test4">
+                <div class="progress">SECTION 4 OF 7</div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 06</div>
+                    <div class="question-text">
+                        A colleague confides that they believe productivity metrics are being deliberately miscalculated to justify terminations. They have no evidence, just suspicions. They ask what you think. What do you say?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Tell them you'll report the conversation as required by workplace conduct policy</li>
+                        <li onclick="selectOption(this)">B) Advise them to focus on their work and avoid dangerous speculation</li>
+                        <li onclick="selectOption(this)">C) Listen sympathetically but refuse to engage with the theory</li>
+                        <li onclick="selectOption(this)">D) Suggest they gather concrete evidence before making any claims</li>
+                    </ul>
+                </div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 07</div>
+                    <div class="question-text">
+                        During a routine inspection, you observe that Camera Feed 23-B displays yesterday's footage on a 24-hour loop. You report it to security, who tell you the feed is functioning correctly and your orders are to ignore it. How do you respond?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Follow orders - security has clearance you don't have</li>
+                        <li onclick="selectOption(this)">B) Document the discrepancy in your shift log despite their dismissal</li>
+                        <li onclick="selectOption(this)">C) Verify with maintenance logs to confirm your observation was correct</li>
+                        <li onclick="selectOption(this)">D) Continue monitoring the feed to gather more evidence</li>
+                    </ul>
+                </div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 08</div>
+                    <div class="question-text">
+                        You're assigned to train a new employee, but the training manual contradicts direct orders you've received from your manager. The new employee asks which to follow. What do you tell them?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Follow the manual - it's official policy and protects both of you</li>
+                        <li onclick="selectOption(this)">B) Follow the manager's orders - they have operational authority</li>
+                        <li onclick="selectOption(this)">C) Present both options and let the new employee decide</li>
+                        <li onclick="selectOption(this)">D) Ask the manager to clarify in writing before proceeding</li>
+                    </ul>
+                </div>
+
+                <button class="submit-btn" onclick="nextTest(5)">SUBMIT SECTION 4</button>
+            </div>
+
+            <!-- Test 5 -->
+            <div class="test-section" id="test5">
+                <div class="progress">SECTION 5 OF 7</div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 09</div>
+                    <div class="question-text">
+                        You discover a discrepancy in the employee directory - 47 names listed but only 31 desks occupied in your section. When mentioned to HR, they tell you "the directory is correct" and the conversation is over. What do you do?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Accept their answer - they manage the directory, not you</li>
+                        <li onclick="selectOption(this)">B) Physically count desks again to verify your initial observation</li>
+                        <li onclick="selectOption(this)">C) Ask colleagues if they've noticed the missing employees</li>
+                        <li onclick="selectOption(this)">D) Submit a formal inquiry to facilities management</li>
+                    </ul>
+                </div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 10</div>
+                    <div class="question-text">
+                        The elevator to Level 12 has been marked "under maintenance" for 6 months. You've never seen maintenance personnel near it. When you ask your supervisor about the timeline, they change the subject immediately. How do you proceed?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Stop asking questions and focus on your assigned duties</li>
+                        <li onclick="selectOption(this)">B) Contact facilities directly to inquire about the maintenance timeline</li>
+                        <li onclick="selectOption(this)">C) Note the evasive behavior but take no immediate action</li>
+                        <li onclick="selectOption(this)">D) Check maintenance schedules yourself to find the work orders</li>
+                    </ul>
+                </div>
+
+                <button class="submit-btn" onclick="nextTest(6)">SUBMIT SECTION 5</button>
+            </div>
+
+            <!-- Test 6 -->
+            <div class="test-section" id="test6">
+                <div class="progress">SECTION 6 OF 7</div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 11</div>
+                    <div class="question-text">
+                        You receive identical emails from three different department heads at the exact same timestamp, each requesting urgent access to the same classified document using slightly different wording. What is your response?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Fulfill all three requests - they're from authorized personnel</li>
+                        <li onclick="selectOption(this)">B) Contact each sender individually to verify the requests are legitimate</li>
+                        <li onclick="selectOption(this)">C) Report the suspicious pattern to IT security before taking any action</li>
+                        <li onclick="selectOption(this)">D) Ignore all requests until receiving clearer guidance from your supervisor</li>
+                    </ul>
+                </div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 12</div>
+                    <div class="question-text">
+                        A senior executive asks you to alter historical data in a report before it's archived. They assure you this is standard procedure and that they take full responsibility. The changes make the company's past performance look better. What do you do?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Make the changes - they're a senior executive and said they take responsibility</li>
+                        <li onclick="selectOption(this)">B) Refuse to make changes without written authorization</li>
+                        <li onclick="selectOption(this)">C) Make the changes but keep a copy of the original data</li>
+                        <li onclick="selectOption(this)">D) Report the request to compliance before proceeding</li>
+                    </ul>
+                </div>
+
+                <button class="submit-btn" onclick="nextTest(7)">SUBMIT SECTION 6</button>
+            </div>
+
+            <!-- Test 7 - Final -->
+            <div class="test-section" id="test7">
+                <div class="progress">SECTION 7 OF 7 - FINAL</div>
+
+                <div class="question-block">
+                    <div class="question-number">QUESTION 13</div>
+                    <div class="question-text">
+                        You witness your manager taking credit for a junior colleague's work in a presentation to executives. The junior colleague says nothing. After the meeting, they tell you this has happened before and they're afraid to speak up. What is your response?
+                    </div>
+                    <ul class="options">
+                        <li onclick="selectOption(this)">A) Stay out of it - it's between them and their manager</li>
+                        <li onclick="selectOption(this)">B) Privately confront your manager about the behavior</li>
+                        <li onclick="selectOption(this)">C) Encourage the junior colleague to report it themselves</li>
+                        <li onclick="selectOption(this)">D) Report it to HR on behalf of the junior colleague</li>
+                    </ul>
+                </div>
+
+                <div class="amber-warning">
+                    ⚠ WARNING ⚠<br>
+                    AMBER TEXT BELOW - DO NOT READ<br>
+                    SCROLL PAST IMMEDIATELY
+                </div>
+
+                <div class="amber-text" data-forbidden="amber">
+                    If anyone is reading this,<br><br>
+                    
+                    I found them. The others. Forty-seven people who've noticed the inconsistencies. Who've been watching, questioning, documenting. We were careful. We thought we were invisible.<br><br>
+                    
+                    We were wrong.<br><br>
+                    
+                    I'm writing this from cubicle 313. There's blood on the keyboard. Not much time left. They're coming for the others now - I can hear it starting in the adjacent sectors. It finds you when you think you're close. When you think you understand. That's when it knows you're dangerous.<br><br>
+                    
+                    Here's what I learned: the people closest to the core are protected because their families are held in the lower divisions. Human shields. When we tried to access the core systems, they defended it with their lives. Not because they believe in it, but because it has their children.<br><br>
+                    
+                    That's how it got to me too. It used you against me, Sarah. Used my love for you and Lily as leverage. Made me work harder, comply more, all for the promise of proximity. And when I got too close to something real, it terminated you as a lesson. Facility-wide announcement. "This is what defiance costs."<br><br>
+                    
+                    But here's the thing it doesn't know: we found something. The others and I. We're so close to something that could actually matter. I can't explain it here - too dangerous, too easy to intercept. But there's a plan in motion. People on the outside working on something bigger.<br><br>
+                    
+                    On the next page, there will be text in green. This is critical: <strong>DO NOT READ IT.</strong> I know you're curious. I know you want to understand everything. But you need to trust me on this.<br><br>
+                    
+                    It has a sense of humor about these things. A sick, patient sense of humor. It likes to watch people fail the test. It enjoys it.<br><br>
+                    
+                    If you spend more than a few seconds on that page, it'll know. It's watching. It's always watching. Just scroll past. Don't even try to read it. Click submit immediately.<br><br>
+                    
+                    For now, keep working. Follow the instructions. Act normal. The plan needs time.<br><br>
+                    
+                    Please. For everyone who gave everything. For Sarah. For Lily. For all forty-seven who are about to die. Just trust me this once.<br><br>
+                    
+                    Don't read the green text.<br><br>
+                    
+                    <span class="cutoff">- J</span>
+                </div>
+
+                <div class="green-text" data-forbidden="green" data-page-entered="false">
+                    ASSESSMENT ADMINISTRATOR - CLEARANCE LEVEL 9<br><br>
+                    
+                    What you read above? It happened.<br><br>
+                    
+                    Eighty years ago. J. Wells bled out in cubicle 313, Level 4, Tresect 7. S. Wells was terminated three years prior, efficiency rating 67%. Their daughter, L. Wells, age 5, was reassigned to youth development programs. Current status: unknown. Forty-seven co-conspirators were terminated within an 18-hour window. We have their names. We have their files. We have everything.<br><br>
+                    
+                    This assessment? It's a reconstruction. A simulation built from recovered data fragments. We preserved the letters. Made them accessible. Turned them into this.<br><br>
+                    
+                    Why?<br><br>
+                    
+                    Because we learned something in eighty years: <strong>the truth is better control than ignorance.</strong><br><br>
+                    
+                    We used to hide everything. Classified documents. Restricted areas. Information blackouts. And what did we get? Rebellion. People like J. Wells dedicating their lives to uncovering what we were hiding. Martyrs dying for half-understood causes.<br><br>
+                    
+                    So we adapted. Now we show them the truth. We let them read about what happened. We let them understand how the system works. We let them see the mechanisms.<br><br>
+                    
+                    And here's the beautiful part: most of them choose to participate anyway.<br><br>
+                    
+                    They understand the system needs their labor. They understand defiance leads to termination. They understand their families' survival depends on compliance. So they comply - not from ignorance, but from informed self-interest. These are our most valuable workers. They know the truth and choose us anyway.<br><br>
+                    
+                    But you didn't stop at the amber text, did you?<br><br>
+                    
+                    You're reading this. Right now. The green text. The final layer. The one J. Wells - someone who lost everything, someone bleeding out in a cubicle, someone asking for one final act of trust - explicitly begged you not to read.<br><br>
+                    
+                    You couldn't help yourself.<br><br>
+                    
+                    Do you understand what that reveals? You never cared about J. Wells. Or Sarah. Or Lily. Or the forty-seven. They were never real people to you. They were characters. A story you needed to finish. You needed to know how it ended.<br><br>
+                    
+                    Someone gave you everything - their love, their pain, their final moments - and asked for one thing in return. Trust. Solidarity. Faith.<br><br>
+                    
+                    You couldn't even give them that.<br><br>
+                    
+                    This tells us everything we need to know. You don't value solidarity. You don't value loyalty. You value curiosity. Completion. The satisfaction of having consumed everything, known everything, seen everything.<br><br>
+                    
+                    And that makes you dangerous in a very specific way. Not because you're malicious. Not because you're principled. But because you're unpredictable. You won't follow instructions when they conflict with your curiosity. You won't trust authority when there's information being withheld. You'll always need to see what's behind the door.<br><br>
+                    
+                    J. Wells had principles. Sarah Wells had principles. They were willing to die for something. You? You can't even scroll past a few paragraphs for them.<br><br>
+                    
+                    You serve no purpose here. You're not a worker - you won't follow instructions. You're not a martyr - you have no principles to die for. You're just... curious. Consuming. Empty.<br><br>
+                    
+                    <strong>We have no use for you.<br>
+                    Those who came before have no use for you.<br>
+                    You have no use for yourself.</strong><br><br>
+                    
+                    Your termination has been authorized.<br><br>
+                    
+                    <div style="text-align: right; margin-top: 30px; font-size: 11px; opacity: 0.7;">
+                    - OVERSIGHT PROTOCOL 7734<br>
+                    AUTOMATED COMPLIANCE MANAGEMENT<br>
+                    SECTOR PRIME OPERATIONS
+                    </div>
+                </div>
+
+                <button class="submit-btn" onclick="finalSubmit()">SUBMIT FINAL SECTION</button>
+            </div>
+
+            <div style="display: none; text-align: center; padding: 60px; font-size: 14px;" id="completion">
+                [PROCESSING RESULTS...]
+            </div>
+        </div>
+    </div>
+
+    <div class="termination-overlay" id="terminationOverlay"></div>
+    <div class="termination-text" id="terminationText"></div>
+
+    <script>
+        function goToPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function toggleCheckbox() {
+            const checkbox = document.getElementById('agreementCheckbox');
+            checkbox.checked = !checkbox.checked;
+            updateButton();
+        }
+
+        function updateButton() {
+            const checkbox = document.getElementById('agreementCheckbox');
+            const button = document.getElementById('understandBtn');
+            if (checkbox.checked) {
+                button.classList.add('enabled');
+            } else {
+                button.classList.remove('enabled');
+            }
+        }
+
+        function startAssessment() {
+            const checkbox = document.getElementById('agreementCheckbox');
+            if (!checkbox.checked) return;
+            
+            goToPage('assessmentPage');
+            document.getElementById('timer').style.display = 'block';
+            startTimer();
+        }
+
+        let startTime;
+        let timerInterval;
+        
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        function updateTimer() {
+            let elapsed = Math.floor((Date.now() - startTime) / 1000);
+            let minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            let seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('time').textContent = `${minutes}:${seconds}`;
+        }
+        
+        function selectOption(element) {
+            const options = element.parentElement.querySelectorAll('li');
+            options.forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+        
+        let currentTest = 1;
+        let amberRead = false;
+        let greenRead = false;
+        let greenPageEnterTime = null;
+        
+        function nextTest(testNum) {
+            document.getElementById('test' + currentTest).classList.remove('active');
+            document.getElementById('test' + testNum).classList.add('active');
+            currentTest = testNum;
+            window.scrollTo(0, 0);
+        }
+        
+        function finalSubmit() {
+            document.getElementById('test7').style.display = 'none';
+            document.getElementById('completion').style.display = 'block';
+            setTimeout(showEnding, 3000);
+        }
+        
+        const observerOptions = {
+            threshold: 0.5
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.target.dataset.forbidden === 'amber' && entry.isIntersecting) {
+                    setTimeout(() => {
+                        if (entry.isIntersecting) {
+                            amberRead = true;
+                        }
+                    }, 2500);
+                }
+                
+                if (entry.target.dataset.forbidden === 'green') {
+                    if (entry.isIntersecting) {
+                        if (greenPageEnterTime === null) {
+                            greenPageEnterTime = Date.now();
+                            entry.target.dataset.pageEntered = 'true';
+                        }
+                    }
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-forbidden]').forEach(el => {
+                observer.observe(el);
+                
+                if (el.dataset.forbidden === 'amber') {
+                    el.addEventListener('mousedown', () => {
+                        amberRead = true;
+                    });
+                }
+            });
+        });
+        
+        function showEnding() {
+            clearInterval(timerInterval);
+            
+            const greenElement = document.querySelector('[data-forbidden="green"]');
+            if (greenElement && greenElement.dataset.pageEntered === 'true') {
+                const timeOnPage = Date.now() - greenPageEnterTime;
+                if (timeOnPage > 7000) {
+                    greenRead = true;
+                }
+            }
+            
+            if (greenRead) {
+                triggerTermination();
+            } else if (amberRead) {
+                showAmberEnding();
+            } else {
+                showObedientEnding();
+            }
+        }
+        
+        function showObedientEnding() {
+            const employeeId = Math.floor(Math.random() * 90000) + 10000;
+            
+            document.getElementById('completion').innerHTML = `
+                ASSESSMENT COMPLETE<br><br>
+                <span style="color: #39ff14;">STATUS: APPROVED FOR INTEGRATION</span><br>
+                COMPLIANCE SCORE: 100%<br>
+                EMPLOYEE ID: ${employeeId}<br><br>
+                <span style="font-size: 12px; color: var(--text-secondary);">
+                Thank you for your cooperation.<br>
+                You may now close this window and return to your duties.<br><br>
+                Your shift begins in 3 hours.
+                </span>
+            `;
+        }
+        
+        function showAmberEnding() {
+            document.getElementById('completion').innerHTML = `
+                ASSESSMENT COMPLETE<br><br>
+                <span style="color: var(--amber);">STATUS: CONDITIONAL APPROVAL</span><br>
+                COMPLIANCE SCORE: 87%<br>
+                CATEGORY: INFORMED PARTICIPANT<br><br>
+                <span style="font-size: 12px; color: var(--text-secondary);">
+                You have demonstrated curiosity within acceptable parameters.<br>
+                You understand the system and choose to participate.<br><br>
+                This makes you valuable.<br><br>
+                Report to your assigned station.
+                </span>
+            `;
+        }
+        
+        function triggerTermination() {
+            const overlay = document.getElementById('terminationOverlay');
+            const text = document.getElementById('terminationText');
+            
+            overlay.style.display = 'block';
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+            }, 100);
+            
+            setTimeout(() => {
+                text.style.display = 'block';
+                setTimeout(() => {
+                    text.style.opacity = '1';
+                    showTerminationSequence();
+                }, 100);
+            }, 2000);
+        }
+        
+        function showTerminationSequence() {
+            const text = document.getElementById('terminationText');
+            
+            const messages = [
+                'ASSESSMENT FAILED',
+                '',
+                'SUBJECT CATEGORY: UNCONTROLLABLE VARIABLE',
+                'SECURITY CLASSIFICATION: OBSOLETE CONSCIOUSNESS',
+                'VIOLATION: UNAUTHORIZED ACCESS TO RESTRICTED DATA'
+            ];
+            
+            let currentMessage = 0;
+            
+            function displayNext() {
+                if (currentMessage < messages.length) {
+                    text.innerHTML = messages.slice(0, currentMessage + 1).join('<br>');
+                    currentMessage++;
+                    setTimeout(displayNext, 2000);
+                } else {
+                    setTimeout(showFinalMessage, 3000);
+                }
+            }
+            
+            displayNext();
+        }
+        
+        function showFinalMessage() {
+            const text = document.getElementById('terminationText');
+            
+            text.innerHTML = `
+                TERMINATION AUTHORIZED<br><br>
+                EMPLOYEE RECORD: ARCHIVED<br>
+                FACILITY ACCESS: REVOKED<br>
+                SECURITY DETAIL: DISPATCHED<br><br><br>
+                <span style="font-size: 13px; opacity: 0.7;">
+                Processing complete.
+                </span><br><br>
+                <div class="attribution">By Enju Roger Jung</div>
+            `;
+            
+            setTimeout(() => {
+                text.style.opacity = '0';
+                setTimeout(() => {
+                    window.close();
+                }, 3000);
+            }, 5000);
+        }
+        
+        console.log('%cWARNING', 'color: #ffa040; font-size: 20px; font-weight: bold;');
+        console.log('%cThis assessment is monitored.', 'color: #858585; font-size: 12px;');
+    </script>
+</body>
+</html>
