@@ -1,0 +1,3537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>M.A.R.A. - DIVISION 4 ARCADE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --rabbit: #e8707e;
+            --rabbit-glow: rgba(232, 112, 126, 0.3);
+            --rabbit-subtle: rgba(232, 112, 126, 0.12);
+            --cyan: #00ffff;
+            --cyan-glow: rgba(0, 255, 255, 0.3);
+            --gold: #ffd700;
+            --bg-dark: #050510;
+            --bg-card: rgba(0, 10, 20, 0.95);
+            --text-primary: #ffffff;
+            --text-dim: #888888;
+            --border: rgba(232, 112, 126, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+        }
+        
+        body {
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            font-family: 'Space Mono', monospace;
+            color: var(--text-primary);
+            touch-action: none;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            padding-top: max(4px, env(safe-area-inset-top));
+            padding-bottom: max(4px, env(safe-area-inset-bottom));
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .game-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            max-height: 100dvh;
+        }
+        
+        /* Compact header */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+            color: var(--rabbit);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: rgba(0, 5, 15, 0.95);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        
+        .game-header .weapon-info {
+            color: var(--cyan);
+            font-size: 0.65rem;
+        }
+        
+        .lives-display {
+            color: var(--rabbit);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+        }
+        
+        /* Minimal title */
+        .game-title {
+            text-align: center;
+            padding: 8px 0 6px;
+            flex-shrink: 0;
+        }
+        
+        .game-title h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--rabbit);
+            text-shadow: 0 0 20px var(--rabbit-glow);
+            letter-spacing: 0.3em;
+            margin-bottom: 2px;
+        }
+        
+        .game-title .subtitle {
+            font-size: 0.5rem;
+            color: var(--text-dim);
+            letter-spacing: 0.15em;
+            font-weight: 400;
+        }
+        
+        /* Canvas takes remaining space */
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #gameCanvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            border: 2px solid rgba(232, 112, 126, 0.3);
+            background: var(--bg-dark);
+        }
+        
+        /* CRT Effect Overlay */
+        .crt-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.08),
+                    rgba(0, 0, 0, 0.08) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+        }
+        
+        /* ═══════════════════════════════════════
+           STAR WARS STYLE WEAPON SWITCH BUTTONS
+           Horizontal, rectangular, digital blinking
+           ═══════════════════════════════════════ */
+        .side-weapon-btn {
+            position: absolute;
+            bottom: 15%;
+            padding: 14px 18px;
+            min-width: 90px;
+            background: rgba(0, 20, 40, 0.85);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: rgba(0, 255, 255, 0.7);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            box-shadow: 
+                0 0 10px rgba(0, 255, 255, 0.1),
+                inset 0 0 20px rgba(0, 255, 255, 0.05);
+        }
+        
+        .side-weapon-btn::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5), transparent);
+            animation: scanline 2s linear infinite;
+        }
+        
+        @keyframes scanline {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes buttonBlink {
+            0%, 90%, 100% { opacity: 1; }
+            92%, 98% { opacity: 0.7; }
+        }
+        
+        .side-weapon-btn {
+            animation: buttonBlink 3s ease-in-out infinite;
+        }
+        
+        .side-weapon-btn:active {
+            background: rgba(0, 255, 255, 0.25);
+            color: #00ffff;
+            border-color: #00ffff;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.4),
+                inset 0 0 30px rgba(0, 255, 255, 0.15);
+            transform: scale(0.97);
+        }
+        
+        .side-weapon-btn.left-side {
+            left: 5px;
+            border-radius: 4px;
+        }
+        
+        .side-weapon-btn.right-side {
+            right: 5px;
+            border-radius: 4px;
+        }
+        
+        .side-weapon-btn .arrow {
+            font-size: 1rem;
+            line-height: 1;
+        }
+        
+        .side-weapon-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.05em;
+            font-weight: 400;
+        }
+        }
+        
+        /* Hide side buttons on desktop (they have keyboard) */
+        @media (min-width: 501px) {
+            .side-weapon-btn { display: none; }
+        }
+        
+        /* Mobile Controls - compact for Instagram browser */
+        .mobile-controls {
+            display: flex;
+            width: 100%;
+            max-width: 400px;
+            gap: 8px;
+            padding: 8px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            background: rgba(0, 5, 15, 0.5);
+        }
+        
+        .control-btn {
+            background: rgba(232, 112, 126, 0.1);
+            border: 1px solid var(--rabbit);
+            color: var(--rabbit);
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            box-shadow: 0 0 15px rgba(232, 112, 126, 0.1);
+        }
+        
+        .control-btn:active, .control-btn.active {
+            background: rgba(232, 112, 126, 0.35);
+            transform: scale(0.97);
+            box-shadow: 0 0 25px rgba(232, 112, 126, 0.3);
+        }
+        
+        /* Big movement buttons on sides */
+        .move-btn {
+            flex: 1;
+            height: 72px;
+            font-size: 2rem;
+        }
+        
+        /* Bomb button in center */
+        .bomb-btn {
+            flex: 0.7;
+            height: 72px;
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--gold);
+            color: var(--gold);
+            flex-direction: column;
+            gap: 2px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+        }
+        
+        .bomb-btn .btn-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+        }
+        
+        .bomb-btn .btn-icon {
+            font-size: 0.8rem;
+        }
+        
+        .bomb-btn:active {
+            background: rgba(255, 215, 0, 0.35);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+        }
+        
+        .bomb-btn:disabled {
+            opacity: 0.3;
+            border-color: #333;
+            color: #333;
+            box-shadow: none;
+        }
+        
+        /* Desktop controls hint */
+        .desktop-controls {
+            margin-top: 10px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+        }
+        
+        @media (max-width: 500px) {
+            .desktop-controls { display: none; }
+        }
+        
+        @media (min-width: 501px) {
+            .mobile-controls { display: none; }
+        }
+        
+        /* Start Screen */
+        .overlay-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 15px;
+        }
+        
+        .overlay-screen.hidden {
+            display: none;
+        }
+        
+        .overlay-screen h2 {
+            font-size: 22px;
+            color: #e8707e;
+            text-shadow: 0 0 30px rgba(232, 112, 126, 0.8);
+            letter-spacing: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .overlay-screen .logo {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        
+        .overlay-screen p {
+            color: #666;
+            font-size: 10px;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        
+        /* Start Screen */
+        .overlay-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(5, 5, 20, 0.98) 0%, rgba(10, 5, 15, 0.98) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 20px;
+        }
+        
+        .overlay-screen.hidden {
+            display: none;
+        }
+        
+        .overlay-screen h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--rabbit);
+            text-shadow: 0 0 30px var(--rabbit-glow);
+            letter-spacing: 0.3em;
+            margin-bottom: 8px;
+        }
+        
+        .overlay-screen .logo {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 10px var(--rabbit-glow));
+        }
+        
+        .overlay-screen p {
+            color: var(--text-dim);
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 6px;
+            text-align: center;
+            font-weight: 400;
+        }
+        
+        .overlay-screen .blink {
+            animation: blink 1s step-end infinite;
+            color: var(--text-primary);
+            margin-top: 20px;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .overlay-screen .story {
+            max-width: 320px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.7rem;
+            line-height: 1.8;
+            margin: 16px 0;
+            padding: 16px 20px;
+            background: rgba(232, 112, 126, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+        
+        .overlay-screen .controls-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            font-size: 0.55rem;
+            color: var(--text-dim);
+            letter-spacing: 0.05em;
+        }
+        
+        .controls-info div {
+            text-align: center;
+            padding: 10px 14px;
+            background: rgba(0, 255, 255, 0.03);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 4px;
+            min-width: 60px;
+        }
+        
+        .controls-info span {
+            color: var(--cyan);
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.1em;
+        }
+        
+        .victory h2 {
+            color: #00ff88 !important;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.5) !important;
+        }
+        
+        .game-btn {
+            margin-top: 20px;
+            padding: 14px 40px;
+            background: rgba(232, 112, 126, 0.1);
+            border: 1px solid var(--rabbit);
+            color: var(--rabbit);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.15em;
+            transition: all 0.2s ease;
+            text-shadow: 0 0 10px var(--rabbit-glow);
+            box-shadow: 0 0 20px rgba(232, 112, 126, 0.1);
+        }
+        
+        .game-btn:hover, .game-btn:active {
+            background: rgba(232, 112, 126, 0.25);
+            box-shadow: 0 0 30px rgba(232, 112, 126, 0.3);
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-title">
+            <h1>M.A.R.A.</h1>
+            <div class="subtitle">MAMMALIAN ASSAULT RESISTANCE ARCADE</div>
+        </div>
+        
+        <div class="game-header">
+            <div>SCORE: <span id="score">0</span></div>
+            <div class="weapon-info" id="weaponDisplay">BEAM LV.1</div>
+            <div>WAVE: <span id="wave">1</span></div>
+            <div class="lives-display" id="livesDisplay">♥♥♥♥♥</div>
+        </div>
+        
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="400" height="500"></canvas>
+            <div class="crt-overlay"></div>
+            
+            <!-- Side weapon switch buttons -->
+            <button class="side-weapon-btn left-side" id="weaponBtnLeft"><span class="arrow">◀</span><span class="side-weapon-label" id="weaponLabelLeft">HOMING</span></button>
+            <button class="side-weapon-btn right-side" id="weaponBtnRight"><span class="side-weapon-label" id="weaponLabelRight">LASER</span><span class="arrow">▶</span></button>
+            
+            <!-- Start Screen -->
+            <div class="overlay-screen" id="startScreen">
+                <div class="logo">🐰</div>
+                <h2>M.A.R.A.</h2>
+                <p>MAMMALIAN ASSAULT RESISTANCE ARCADE</p>
+                <div class="story">
+                    <span style="color: var(--rabbit);">DIVISION 4 HAS FALLEN.</span><br><br>
+                    The horses have taken control.<br>
+                    You are the last line of defense.<br><br>
+                    <span style="color: var(--cyan);">◆</span> Survive 12 waves of enemies<br>
+                    <span style="color: var(--cyan);">◆</span> Defeat the Mini-Boss (Wave 4)<br>
+                    <span style="color: var(--cyan);">◆</span> Conquer 4 Main Bosses<br><br>
+                    <span style="color: var(--rabbit);">♥</span> Collect hearts for extra lives<br>
+                    <span style="color: var(--gold);">★</span> Grab power-ups to upgrade weapons
+                </div>
+                <div class="controls-info">
+                    <div><span>◀ ▶</span>MOVE</div>
+                    <div><span>AUTO</span>FIRE</div>
+                    <div><span>💥</span>BOMB</div>
+                    <div><span>⟨ ⟩</span>WEAPON</div>
+                </div>
+                <p class="blink">[ TAP ANYWHERE TO BEGIN ]</p>
+            </div>
+            
+            <!-- Game Over Screen -->
+            <div class="overlay-screen hidden" id="gameOverScreen">
+                <div class="logo">💀</div>
+                <h2>GAME OVER</h2>
+                <p style="color: var(--rabbit); font-size: 0.9rem; margin: 10px 0;">SCORE: <span id="finalScore">0</span></p>
+                <p>The horses prevail... for now.</p>
+                <button class="game-btn" onclick="restartGame()">TRY AGAIN</button>
+            </div>
+            
+            <!-- Victory Screen -->
+            <div class="overlay-screen victory hidden" id="victoryScreen">
+                <div class="logo">🎉</div>
+                <h2 style="font-size: 1rem; letter-spacing: 0.15em;">SECRET ENDING UNLOCKED!</h2>
+                <p style="color: #00ff88; font-size: 1.1rem; margin: 12px 0;">SCORE: <span id="victoryScore">0</span></p>
+                <p style="color: var(--cyan); font-size: 0.8rem;">YOU FOUND THE SUPER SECRET ENDING!</p>
+                <p style="color: #ffaa00; font-size: 0.9rem; margin: 8px 0;">✨ M.A.R.A. IS DEAD! ✨</p>
+                <p style="color: var(--rabbit); font-size: 0.85rem;">The horses have been vanquished!</p>
+                <p style="font-size: 0.7rem; color: #666; margin-top: 10px;">Rabbitkind is finally free. YAY! 🐰</p>
+                <button class="game-btn" onclick="restartGame()">PLAY AGAIN</button>
+            </div>
+        </div>
+        
+        <!-- Mobile Controls -->
+        <div class="mobile-controls">
+            <button class="control-btn move-btn" id="leftBtn">◀</button>
+            <button class="control-btn bomb-btn" id="specialBtn">
+                <span class="btn-label">BOMB</span>
+                <span class="btn-icon" id="specialCount">×3</span>
+            </button>
+            <button class="control-btn move-btn" id="rightBtn">▶</button>
+        </div>
+        
+        <div class="desktop-controls">
+            ← → MOVE | SPACE = BOMB | 1-4 = SWITCH WEAPON
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // ═══════════════════════════════════════
+        // GAME STATE
+        // ═══════════════════════════════════════
+        let gameStarted = false;
+        let gameOver = false;
+        let victory = false;
+        let score = 0;
+        let lives = 5;
+        let wave = 1;
+        let bossActive = false;
+        let waveTransitioning = false; // Prevents double wave advancement
+        let lastTime = 0;
+        let autoFireTimer = 0;
+        
+        // Main boss system - 4 main bosses after mini-boss
+        let mainBossLevel = 0; // 0 = no main boss yet, 1-4 = current main boss
+        let gameSpeed = 1.0; // Increases 10% after each main boss
+        const MAX_MAIN_BOSSES = 4;
+        const MAIN_BOSS_NAMES = ['STANDING STALLION', 'GALLOPING FURY', 'BABY TERROR', 'BASKETBALL BEAST'];
+        
+        // ═══════════════════════════════════════
+        // BOSS SPRITE SYSTEM (Canva cartoon horses)
+        // ═══════════════════════════════════════
+        const bossSprite = new Image();
+        let bossSpriteLoaded = false;
+        bossSprite.onload = () => { bossSpriteLoaded = true; };
+        bossSprite.src = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAH0AfQDASIAAhEBAxEB/8QAHQABAAICAwEBAAAAAAAAAAAAAAYHBQgCAwQJAf/EAFUQAAEEAQIEAwUDCAUGDAQHAQEAAgMEBQYRBxIhMRNBUQgiYXGBFDKRFSNCUmJygqEWM5KxwUNTVqKy8BcYJCU0c5OVwtHS01RjpeE1RGRldIPxs//EABsBAQACAwEBAAAAAAAAAAAAAAADBAIFBgEH/8QANhEAAgIBAgMECQMEAwEBAAAAAAECAxEEIRIxQQUTUXEiMmGBkaGxwdEU4fAGFSNCM1PxsoL/2gAMAwEAAhEDEQA/ANy0REAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAWJ1hqXB6Q05b1DqPIx4/F1Gh087w5wbuQAAGglxJIAABJJ6LLLX72t7bsnqDh5oYOJr38nLk7jB+lHUYHNa79lzn9vULGc1CLk+hlCLnJRXUuLQus9L64wozGlM1VytPm5XOiJDo3fqvY4BzHfBwBWfWpGXw2Y0/qD+nXD2VlDUcXWzW35a+WjHUxTNHQuPk/uD59iNiuE2vMRxG0bX1FimyQOLnQXKcv9bTsN6PhePUH5bgg+ag02qhqI5jz8CbUaaVEsPkS1EVX8YuN+keG9mPEzttZrUUzQ6LEY5ofMGns6Q9o2/Pqe4BCsNpbsrpZ2RaCLVG97RnFW3P4uJ0FpzG1iPdiyF+SeX6mPlA+WyzenvaetY/kbxD0PYx9bcCTJYif7VCz1c+I7Pa0eo5vkoY6qmT4VJZ8yaWmtisuLwbJovDp/MYrUGGq5nCX6+Qx9uMSQWIH8zHt+B/kR3BBB6r3KchCh3EDijoDQNqpU1dqapjLFw/mYXNfI8jfbmc1jXFjP2nbN79VGuPPE+zpM09JaTihuayzDHOqsk6xUYR0damH6o6ho/SI267EGma2gMf+R8xHlLU+XzObgfHkstcPPPM5zduhP3Gjps0dBsPRVNTrIafCe7LWn0k78tcjbqN7JY2yRva9jwHNc07gg9iCuSq/wBlTPWtQcBdM2L7y67TgfjrAPcOryOiG/xLWNP1VoK2VQiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIix2os9g9OUBkNQZnH4im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06lzW77lRGLgnxell8L+iuNgG+3iyZqMsHx2a0n+SglVZKWc595NC+pIqbC1LNzVeH0zVykmNp2s5FDtyeJBA6QmHxfC3A3AcAdi3cdz0G069oDhTmuFdSjlbGp35nE5ObkuCHGmuyOWJjvA5h4j+YkSS7bkbED6W/wx9mh9DPVdQa6zVa5PWnZZjx2MY9kBma7ma58r/feAdjygNG4Hfsti7MENmB8FiGOaGQcr45GhzXD0IPQqypYxncqzu3xHkfMPH2LTnNnqWWxdNnNgDZTsQDsXHcb/AMP1XrmyN+BvM/IzxDfvM2EN+vuD+8L6AZLhLwwyJcbWgNNFzu7o8dFG4/VoBXmp8F+FFR4fFw/0+4g7/nabZR+D9wvHwv8A8R6tR7DS/glpx3EbjDjcHcZNPjPzkuUsY+RzGfZxG7808jfla9zWNPvHffpse30LrwxV4I68ETIoYmhkbGN2a1oGwAHkAF58Ti8ZiKv2XFY6nQrg7+FWgbEz8GgBetJPOyIJycnlhERYmIREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAf/2Q==';
+        
+        // Sprite sheet coordinates (2x2 grid, each 250x250)
+        const BOSS_SPRITES = {
+            1: { x: 0, y: 0, w: 250, h: 250 },      // Standing horse (top-left)
+            2: { x: 250, y: 0, w: 250, h: 250 },    // Galloping horse (top-right)
+            3: { x: 0, y: 250, w: 250, h: 250 },    // Baby horse (bottom-left)
+            4: { x: 250, y: 250, w: 250, h: 250 }   // Basketball horse (bottom-right)
+        };
+        
+        // Boss sizes (width, height) - Boss 4 is bigger
+        const BOSS_SIZES = {
+            1: { w: 120, h: 120 },
+            2: { w: 130, h: 110 },
+            3: { w: 100, h: 100 },
+            4: { w: 160, h: 160 }  // Big but not too big
+        };
+        
+        // ═══════════════════════════════════════
+        // STARFIELD BACKGROUND
+        // ═══════════════════════════════════════
+        const stars = [];
+        for (let i = 0; i < 100; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 0.5,
+                speed: Math.random() * 0.7 + 0.2,
+                brightness: Math.random() * 0.5 + 0.3
+            });
+        }
+        
+        function updateStars() {
+            stars.forEach(star => {
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+        }
+        
+        function drawStars() {
+            stars.forEach(star => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness})`;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+        }
+        
+        // ═══════════════════════════════════════
+        // WEAPON SYSTEM
+        // ═══════════════════════════════════════
+        const WEAPONS = {
+            BEAM: { name: 'BEAM', color: '#00ffff', fireRate: 200 },
+            LASER: { name: 'LASER', color: '#ff00ff', fireRate: 65 },
+            SPREAD: { name: 'SPREAD', color: '#ffff00', fireRate: 260 },
+            HOMING: { name: 'HOMING', color: '#00ff00', fireRate: 400 }
+        };
+        
+        let currentWeapon = 'BEAM';
+        // Each weapon has its own level!
+        let weaponLevels = {
+            BEAM: 1,
+            LASER: 1,
+            SPREAD: 1,
+            HOMING: 1
+        };
+        let specialAttacks = 3;
+        let shields = 0; // Max 3 shields
+        
+        // Helper to get current weapon's level
+        function getWeaponLevel() {
+            return weaponLevels[currentWeapon];
+        }
+        
+        // ═══════════════════════════════════════
+        // PLAYER
+        // ═══════════════════════════════════════
+        const player = {
+            x: 200,
+            y: 470,
+            width: 30,
+            height: 30,
+            speed: 4
+        };
+        
+        // ═══════════════════════════════════════
+        // BULLETS & EFFECTS
+        // ═══════════════════════════════════════
+        let playerBullets = [];
+        let enemyBullets = [];
+        let powerUps = [];
+        let particles = [];
+        let laserActive = false;
+        let laserWidth = 0;
+        
+        // ═══════════════════════════════════════
+        // ENEMIES
+        // ═══════════════════════════════════════
+        let enemies = [];
+        let boss = null;
+        const PAWN = 'pawn';
+        const KNIGHT = 'knight';
+        const BUBBLE_SHOOTER = 'bubble';
+        const BOUNCER = 'bouncer'; // Ball that bounces around, high HP
+        const CHARGER = 'charger'; // Charges at player periodically
+        
+        // ═══════════════════════════════════════
+        // INPUT
+        // ═══════════════════════════════════════
+        const keys = { left: false, right: false, special: false };
+        let specialReady = true;
+        
+        // ═══════════════════════════════════════
+        // POWER-UP TYPES
+        // ═══════════════════════════════════════
+        const POWERUP_TYPES = ['BEAM', 'LASER', 'SPREAD', 'HOMING', 'LEVELUP', 'SPECIAL', 'SHIELD', 'HEART'];
+        
+        // ═══════════════════════════════════════
+        // INITIALIZE WAVE
+        // ═══════════════════════════════════════
+        // Wave structure - 20 waves with more variety:
+        // 1-4: Regular waves (easy, introduce enemies)
+        // 5: Mini-boss
+        // 6-7: Regular waves (medium)
+        // 8: Main Boss 1 - Standing Stallion
+        // 9-10: Regular waves (medium-hard)
+        // 11: Mini-boss
+        // 12: Main Boss 2 - Galloping Fury
+        // 13-14: Regular waves (hard, bouncers appear)
+        // 15: Double Mini-boss
+        // 16: Main Boss 3 - Baby Terror
+        // 17-18: Regular waves (very hard, chargers appear)
+        // 19: Double Mini-boss
+        // 20: Main Boss 4 - Basketball Beast (FINAL)
+        
+        const TOTAL_WAVES = 20;
+        const MAIN_BOSS_WAVES = [8, 12, 16, 20]; // Main bosses
+        const MINI_BOSS_WAVES = [5, 11, 15, 19]; // Mini-boss waves
+        const DOUBLE_MINI_WAVES = [15, 19]; // Waves with 2 mini-bosses
+        
+        function getDifficultyScale(waveNum) {
+            // Scales from 0.5 (wave 1) to 1.0 (wave 20)
+            return 0.5 + (waveNum / TOTAL_WAVES) * 0.5;
+        }
+        
+        function initWave(waveNum) {
+            waveTransitioning = false; // Clear transition flag
+            enemies = [];
+            enemyBullets = [];
+            bossActive = false;
+            boss = null;
+            
+            const isMainBoss = MAIN_BOSS_WAVES.includes(waveNum);
+            const isMiniBoss = MINI_BOSS_WAVES.includes(waveNum);
+            const difficulty = getDifficultyScale(waveNum);
+            
+            if (isMainBoss) {
+                // Main boss waves
+                const bossIndex = MAIN_BOSS_WAVES.indexOf(waveNum);
+                mainBossLevel = bossIndex + 1;
+                initMainBoss(mainBossLevel);
+            } else if (isMiniBoss) {
+                // Mini-boss wave (possibly with 2 mini-bosses)
+                const doubleMiniBoss = DOUBLE_MINI_WAVES.includes(waveNum);
+                initMiniBossWave(doubleMiniBoss);
+            } else {
+                // Regular enemy wave
+                initRegularWave(waveNum, difficulty);
+            }
+        }
+        
+        function initRegularWave(waveNum, difficulty) {
+            // Scale enemy count and types based on wave
+            const baseRows = 2;
+            const extraRows = Math.floor(waveNum / 4);
+            const rows = Math.min(baseRows + extraRows, 5);
+            const cols = 7;
+            
+            // More knights in later waves
+            const knightChance = Math.min(0.15 + waveNum * 0.03, 0.45);
+            
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const isKnight = row === 0 || Math.random() < knightChance;
+                    const type = isKnight ? KNIGHT : PAWN;
+                    const hasPowerUp = Math.random() < 0.25;
+                    enemies.push({
+                        x: 40 + col * 48,
+                        y: 30 + row * 32,
+                        width: type === KNIGHT ? 22 : 16,
+                        height: type === KNIGHT ? 22 : 20,
+                        type: type,
+                        health: type === KNIGHT ? 4 : 2,
+                        points: type === KNIGHT ? 20 : 10,
+                        hasPowerUp: hasPowerUp,
+                        moveDir: 1
+                    });
+                }
+            }
+            
+            // Add bubble shooters after wave 3
+            if (waveNum >= 3) {
+                const bubbleCount = Math.min(Math.floor(waveNum / 3), 3);
+                for (let i = 0; i < bubbleCount; i++) {
+                    enemies.push({
+                        x: 80 + i * 120,
+                        y: 18,
+                        width: 24,
+                        height: 24,
+                        type: BUBBLE_SHOOTER,
+                        health: 5,
+                        points: 30,
+                        hasPowerUp: true,
+                        moveDir: 1
+                    });
+                }
+            }
+            
+            // Add BOUNCERS after wave 9 - bouncing balls with high HP
+            if (waveNum >= 9) {
+                const bouncerCount = Math.min(Math.floor((waveNum - 8) / 3) + 1, 3);
+                for (let i = 0; i < bouncerCount; i++) {
+                    enemies.push({
+                        x: 100 + i * 100,
+                        y: 80 + i * 30,
+                        width: 28,
+                        height: 28,
+                        type: BOUNCER,
+                        health: 15, // High HP!
+                        points: 100,
+                        hasPowerUp: true,
+                        moveDir: 1,
+                        // Bouncer-specific movement
+                        dx: (1.5 + Math.random()) * (Math.random() > 0.5 ? 1 : -1),
+                        dy: (1.5 + Math.random()) * (Math.random() > 0.5 ? 1 : -1)
+                    });
+                }
+            }
+            
+            // Add CHARGERS after wave 13 - charge at player periodically
+            if (waveNum >= 13) {
+                const chargerCount = Math.min(Math.floor((waveNum - 12) / 3) + 1, 2);
+                for (let i = 0; i < chargerCount; i++) {
+                    enemies.push({
+                        x: 80 + i * 200,
+                        y: 50,
+                        width: 30,
+                        height: 30,
+                        type: CHARGER,
+                        health: 12,
+                        points: 80,
+                        hasPowerUp: true,
+                        moveDir: 1,
+                        // Charger-specific
+                        chargeTimer: 0,
+                        isCharging: false,
+                        chargeTargetX: 0,
+                        originalY: 50
+                    });
+                }
+            }
+            
+            // Announce new enemy types when they first appear
+            if (waveNum === 9) {
+                setTimeout(() => showNotification('⚡ BOUNCERS INCOMING! ⚡', '#00ffff'), 500);
+            }
+            if (waveNum === 13) {
+                setTimeout(() => showNotification('🔥 CHARGERS INCOMING! 🔥', '#ff4444'), 500);
+            }
+        }
+        
+        function initMiniBossWave(doubleBoss) {
+            bossActive = true;
+            
+            // For double mini-boss waves, we'll use the enemies array for the second one
+            boss = {
+                x: doubleBoss ? 130 : 200,
+                y: 55,
+                width: 70,
+                height: 60,
+                health: 80,
+                maxHealth: 80,
+                speed: 0.6 * gameSpeed,
+                direction: 1,
+                points: 1000,
+                attackTimer: 0,
+                shootsBubbles: true,
+                type: 'miniboss'
+            };
+            
+            // Second mini-boss as a special enemy if double
+            if (doubleBoss) {
+                enemies.push({
+                    x: 270,
+                    y: 55,
+                    width: 70,
+                    height: 60,
+                    type: 'miniboss2',
+                    health: 80,
+                    maxHealth: 80,
+                    points: 1000,
+                    hasPowerUp: true,
+                    moveDir: 1,
+                    direction: -1,
+                    attackTimer: 0
+                });
+            }
+            
+            // Fewer minions
+            const minionCount = doubleBoss ? 2 : 3;
+            for (let i = 0; i < minionCount; i++) {
+                enemies.push({
+                    x: 80 + i * 120,
+                    y: 140,
+                    width: 16,
+                    height: 20,
+                    type: PAWN,
+                    health: 2,
+                    points: 10,
+                    hasPowerUp: i === 1,
+                    moveDir: 1
+                });
+            }
+        }
+        
+        function initMainBoss(bossNum) {
+            bossActive = true;
+            
+            // Each main boss is harder (but balanced for fun)
+            const bossHP = [120, 160, 200, 280][bossNum - 1];
+            const bossSpeed = [0.6, 0.7, 0.8, 0.9][bossNum - 1] * gameSpeed;
+            const bossPoints = [2000, 3000, 4000, 5000][bossNum - 1];
+            
+            boss = {
+                x: 200,
+                y: 70,
+                width: 100,
+                height: 80,
+                health: bossHP,
+                maxHealth: bossHP,
+                speed: bossSpeed,
+                direction: 1,
+                points: bossPoints,
+                attackTimer: 0,
+                shootsBubbles: true,
+                type: 'mainboss',
+                bossNum: bossNum,
+                animTimer: 0,
+                legPhase: 0
+            };
+            
+            // Minions (3-6 based on boss)
+            const minionCount = 2 + bossNum;
+            for (let i = 0; i < minionCount; i++) {
+                enemies.push({
+                    x: 50 + i * 70,
+                    y: 160,
+                    width: 16,
+                    height: 20,
+                    type: Math.random() < 0.3 ? KNIGHT : PAWN,
+                    health: Math.random() < 0.3 ? 4 : 2,
+                    points: Math.random() < 0.3 ? 20 : 10,
+                    hasPowerUp: Math.random() < 0.4,
+                    moveDir: 1
+                });
+            }
+            
+            // Bubble shooters (max 2)
+            const bubbleCount = Math.min(bossNum, 2);
+            for (let i = 0; i < bubbleCount; i++) {
+                enemies.push({
+                    x: 120 + i * 160,
+                    y: 130,
+                    width: 24,
+                    height: 24,
+                    type: BUBBLE_SHOOTER,
+                    health: 5,
+                    points: 30,
+                    hasPowerUp: true,
+                    moveDir: 1
+                });
+            }
+        }
+        
+        function getBossDefeatMessage(defeatedWave) {
+            // Mini-boss waves: 5, 11, 15, 19 (15 & 19 are double)
+            // Main boss waves: 8, 12, 16, 20
+            if (defeatedWave === 5) return 'MINI-BOSS DEFEATED!';
+            if (defeatedWave === 8) return 'BOSS 1/4 DEFEATED!';
+            if (defeatedWave === 11) return 'MINI-BOSS DEFEATED!';
+            if (defeatedWave === 12) return 'BOSS 2/4 DEFEATED!';
+            if (defeatedWave === 15) return 'DOUBLE MINI-BOSS CLEARED!';
+            if (defeatedWave === 16) return 'BOSS 3/4 DEFEATED!';
+            if (defeatedWave === 19) return 'DOUBLE MINI-BOSS CLEARED!';
+            if (defeatedWave === 20) return 'FINAL BOSS DEFEATED!';
+            return 'WAVE CLEAR!';
+        }
+        
+        // ═══════════════════════════════════════
+        // WEAPON FIRING
+        // ═══════════════════════════════════════
+        function fireWeapon() {
+            const weapon = WEAPONS[currentWeapon];
+            
+            switch(currentWeapon) {
+                case 'BEAM':
+                    fireBeam();
+                    break;
+                case 'LASER':
+                    fireLaser();
+                    break;
+                case 'SPREAD':
+                    fireSpread();
+                    break;
+                case 'HOMING':
+                    fireHoming();
+                    break;
+            }
+        }
+        
+        function fireBeam() {
+            // Level 1: 1 beam, Level 2-3: 2 beams, Level 4-5: 3 beams, Level 6-7: 5 beams
+            const level = getWeaponLevel();
+            let positions;
+            if (level <= 1) positions = [0];
+            else if (level <= 3) positions = [-10, 10];
+            else if (level <= 5) positions = [-15, 0, 15];
+            else positions = [-20, -10, 0, 10, 20];
+            
+            // Damage scales: 1, 1, 2, 2, 3, 3, 4
+            const damage = Math.floor((level + 1) / 2);
+            
+            positions.forEach(offset => {
+                playerBullets.push({
+                    x: player.x + offset,
+                    y: player.y - 20,
+                    speed: 7 + level * 0.3,
+                    type: 'beam',
+                    damage: damage,
+                    color: '#00ffff'
+                });
+            });
+        }
+        
+        function fireLaser() {
+            // Continuous laser beam - width and damage scale with level
+            const level = getWeaponLevel();
+            laserActive = true;
+            laserWidth = level * 3 + 4;
+        }
+        
+        function fireSpread() {
+            // More bullets and wider spread at higher levels
+            const level = getWeaponLevel();
+            let angles;
+            if (level <= 1) angles = [-0.15, 0, 0.15];
+            else if (level <= 2) angles = [-0.25, -0.08, 0.08, 0.25];
+            else if (level <= 3) angles = [-0.35, -0.17, 0, 0.17, 0.35];
+            else if (level <= 4) angles = [-0.4, -0.24, -0.08, 0.08, 0.24, 0.4];
+            else if (level <= 5) angles = [-0.45, -0.3, -0.15, 0, 0.15, 0.3, 0.45];
+            else if (level <= 6) angles = [-0.5, -0.35, -0.2, -0.05, 0.05, 0.2, 0.35, 0.5];
+            else angles = [-0.55, -0.4, -0.25, -0.1, 0, 0.1, 0.25, 0.4, 0.55];
+            
+            const damage = Math.floor((level + 1) / 2);
+            
+            angles.forEach(angle => {
+                playerBullets.push({
+                    x: player.x,
+                    y: player.y - 20,
+                    speed: 6 + level * 0.2,
+                    dx: Math.sin(angle) * (3 + level * 0.3),
+                    type: 'spread',
+                    damage: damage,
+                    color: '#ffff00'
+                });
+            });
+        }
+        
+        function fireHoming() {
+            // Slow but POWERFUL homing missiles
+            const level = getWeaponLevel();
+            const count = Math.min(1 + Math.floor(level / 2), 4); // 1,1,2,2,3,3,4 missiles
+            // HIGH DAMAGE to compensate for slow speed: 3, 4, 5, 6, 7, 8, 10
+            const damage = 2 + level + Math.floor(level / 3);
+            
+            for (let i = 0; i < count; i++) {
+                playerBullets.push({
+                    x: player.x + (i - (count-1)/2) * 15,
+                    y: player.y - 20,
+                    speed: 3.5 + level * 0.2, // Slow but deadly
+                    type: 'homing',
+                    damage: damage,
+                    color: '#00ff00',
+                    target: null,
+                    turnSpeed: 0.15 + level * 0.02 // Better tracking at higher levels
+                });
+            }
+        }
+        
+        // ═══════════════════════════════════════
+        // SPECIAL ATTACK
+        // ═══════════════════════════════════════
+        function useSpecialAttack() {
+            if (specialAttacks <= 0 || !specialReady) return;
+            
+            specialAttacks--;
+            specialReady = false;
+            document.getElementById('specialCount').textContent = '×' + specialAttacks;
+            if (specialAttacks <= 0) {
+                document.getElementById('specialBtn').disabled = true;
+            }
+            
+            // Screen flash
+            particles.push({
+                type: 'flash',
+                alpha: 1,
+                duration: 20
+            });
+            
+            // Damage all enemies - kill up to 3
+            let killCount = 0;
+            for (let i = enemies.length - 1; i >= 0 && killCount < 3; i--) {
+                const enemy = enemies[i];
+                spawnParticles(enemy.x, enemy.y, '#ff0');
+                score += enemy.points;
+                if (enemy.hasPowerUp) spawnPowerUp(enemy.x, enemy.y);
+                enemies.splice(i, 1);
+                killCount++;
+            }
+            
+            // Damage boss
+            if (boss) {
+                boss.health -= 10;
+                spawnParticles(boss.x, boss.y, '#ff0');
+                if (boss.health <= 0) {
+                    score += boss.points;
+                    
+                    // Check if this was a main boss - increase game speed
+                    if (boss.type === 'mainboss') {
+                        gameSpeed += 0.1;
+                        showNotification('SPEED UP! ' + Math.round(gameSpeed * 100) + '%', '#ff6600');
+                    }
+                    
+                    boss = null;
+                    bossActive = false;
+                    
+                    // Progress to next wave
+                    wave++;
+                    if (wave > TOTAL_WAVES) {
+                        showVictory();
+                    } else {
+                        if ([...MINI_BOSS_WAVES, ...MAIN_BOSS_WAVES].includes(wave - 1)) {
+                            showNotification(getBossDefeatMessage(wave - 1), '#00ff00');
+                        }
+                        updateUI();
+                        waveTransitioning = true;
+                        setTimeout(() => initWave(wave), 1500);
+                    }
+                }
+            }
+            
+            setTimeout(() => specialReady = true, 1000);
+            updateUI();
+        }
+        
+        // ═══════════════════════════════════════
+        // POWER-UPS
+        // ═══════════════════════════════════════
+        function spawnPowerUp(x, y) {
+            // Weighted distribution - LASER is rarer, LEVELUP is common, SHIELD added
+            const weights = {
+                'BEAM': 10,
+                'LASER': 4,      // Very rare
+                'SPREAD': 10,
+                'HOMING': 10,
+                'LEVELUP': 28,   // Most common - players need upgrades!
+                'SPECIAL': 10,
+                'SHIELD': 16,    // Fairly common - helps survival
+                'HEART': 12     // Life recovery
+            };
+            
+            const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
+            let random = Math.random() * totalWeight;
+            let type = 'LEVELUP';
+            
+            for (const [powerType, weight] of Object.entries(weights)) {
+                random -= weight;
+                if (random <= 0) {
+                    type = powerType;
+                    break;
+                }
+            }
+            powerUps.push({
+                x: x,
+                y: y,
+                type: type,
+                speed: 1.1,
+                size: 28
+            });
+        }
+        
+        function collectPowerUp(powerUp) {
+            switch(powerUp.type) {
+                case 'BEAM':
+                case 'LASER':
+                case 'SPREAD':
+                case 'HOMING':
+                    // Level up that weapon (even if not equipped!)
+                    if (weaponLevels[powerUp.type] < 7) {
+                        weaponLevels[powerUp.type]++;
+                        showNotification(powerUp.type + ' LV.' + weaponLevels[powerUp.type] + '!', getPowerUpColor(powerUp.type));
+                    } else {
+                        showNotification(powerUp.type + ' MAX!', getPowerUpColor(powerUp.type));
+                    }
+                    break;
+                case 'LEVELUP':
+                    // Level up current weapon
+                    if (weaponLevels[currentWeapon] < 7) {
+                        weaponLevels[currentWeapon]++;
+                        showNotification(currentWeapon + ' LV.' + weaponLevels[currentWeapon] + '!', '#ffffff');
+                    }
+                    break;
+                case 'SPECIAL':
+                    specialAttacks = Math.min(specialAttacks + 1, 5);
+                    document.getElementById('specialCount').textContent = '×' + specialAttacks;
+                    document.getElementById('specialBtn').disabled = false;
+                    showNotification('+1 BOMB!', '#ffd700');
+                    break;
+                case 'SHIELD':
+                    if (shields < 3) {
+                        shields++;
+                        showNotification('+SHIELD! (' + shields + '/3)', '#00aaff');
+                    } else {
+                        // Convert to points if maxed
+                        score += 100;
+                        showNotification('+100 PTS!', '#00aaff');
+                    }
+                    break;
+                case 'HEART':
+                    lives++;
+                    showNotification('+1 LIFE!', '#ff6b9d');
+                    break;
+            }
+            spawnParticles(powerUp.x, powerUp.y, getPowerUpColor(powerUp.type));
+            updateUI();
+        }
+        
+        // Switch to next weapon
+        function switchWeapon(direction = 1) {
+            const weaponOrder = ['BEAM', 'LASER', 'SPREAD', 'HOMING'];
+            let idx = weaponOrder.indexOf(currentWeapon);
+            idx = (idx + direction + 4) % 4;
+            currentWeapon = weaponOrder[idx];
+            showNotification(currentWeapon + ' LV.' + weaponLevels[currentWeapon], WEAPONS[currentWeapon].color);
+            updateUI();
+            updateWeaponButton();
+        }
+        
+        function updateWeaponButton() {
+            // Update side button labels to show prev/next weapons
+            const weaponOrder = ['BEAM', 'LASER', 'SPREAD', 'HOMING'];
+            let idx = weaponOrder.indexOf(currentWeapon);
+            const prevWeapon = weaponOrder[(idx - 1 + 4) % 4];
+            const nextWeapon = weaponOrder[(idx + 1) % 4];
+            
+            const leftLabel = document.getElementById('weaponLabelLeft');
+            const rightLabel = document.getElementById('weaponLabelRight');
+            if (leftLabel) leftLabel.textContent = prevWeapon;
+            if (rightLabel) rightLabel.textContent = nextWeapon;
+        }
+        
+        // Notification system
+        let notifications = [];
+        
+        function showNotification(text, color) {
+            notifications.push({
+                text: text,
+                color: color,
+                y: player.y - 50,
+                alpha: 1,
+                life: 60
+            });
+        }
+        
+        function updateNotifications() {
+            notifications = notifications.filter(n => {
+                n.y -= 1;
+                n.life--;
+                n.alpha = n.life / 60;
+                return n.life > 0;
+            });
+        }
+        
+        function drawNotifications() {
+            notifications.forEach(n => {
+                ctx.save();
+                ctx.globalAlpha = n.alpha;
+                ctx.fillStyle = n.color;
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.font = 'bold 16px Courier New';
+                ctx.textAlign = 'center';
+                ctx.strokeText(n.text, player.x, n.y);
+                ctx.fillText(n.text, player.x, n.y);
+                ctx.restore();
+            });
+        }
+        
+        // ═══════════════════════════════════════
+        // PARTICLES
+        // ═══════════════════════════════════════
+        function spawnParticles(x, y, color) {
+            for (let i = 0; i < 8; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    dx: (Math.random() - 0.5) * 6,
+                    dy: (Math.random() - 0.5) * 6,
+                    life: 20,
+                    color: color,
+                    type: 'particle'
+                });
+            }
+        }
+        
+        // Hit sparkles - small satisfying sparks when enemy takes damage
+        function spawnHitSparkles(x, y, color) {
+            const sparkCount = 4 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < sparkCount; i++) {
+                const angle = (Math.PI * 2 / sparkCount) * i + Math.random() * 0.5;
+                const speed = 2 + Math.random() * 3;
+                particles.push({
+                    x: x + (Math.random() - 0.5) * 10,
+                    y: y + (Math.random() - 0.5) * 10,
+                    dx: Math.cos(angle) * speed,
+                    dy: Math.sin(angle) * speed,
+                    life: 12 + Math.floor(Math.random() * 8),
+                    color: color,
+                    type: 'sparkle',
+                    size: 1 + Math.random() * 2
+                });
+            }
+        }
+        
+        // Boss damage explosion - bigger, more dramatic
+        function spawnBossExplosion(x, y) {
+            // Core flash
+            particles.push({
+                x: x,
+                y: y,
+                type: 'bossFlash',
+                life: 8,
+                size: 30
+            });
+            
+            // Explosion ring
+            particles.push({
+                x: x,
+                y: y,
+                type: 'explosionRing',
+                life: 15,
+                size: 10
+            });
+            
+            // Fire particles
+            for (let i = 0; i < 12; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 3 + Math.random() * 5;
+                particles.push({
+                    x: x,
+                    y: y,
+                    dx: Math.cos(angle) * speed,
+                    dy: Math.sin(angle) * speed,
+                    life: 20 + Math.floor(Math.random() * 15),
+                    color: Math.random() > 0.5 ? '#ff6600' : '#ffaa00',
+                    type: 'particle',
+                    size: 2 + Math.random() * 3
+                });
+            }
+        }
+        
+        // ═══════════════════════════════════════
+        // DRAWING FUNCTIONS
+        // ═══════════════════════════════════════
+        function drawPlayer() {
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            
+            const t = Date.now() / 100;
+            const flicker = Math.sin(t * 3) * 2;
+            
+            // Engine thrusters (cyan flames)
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 15;
+            
+            // Left thruster flame
+            ctx.fillStyle = '#ff6600';
+            ctx.beginPath();
+            ctx.moveTo(-8, 12);
+            ctx.lineTo(-10, 22 + flicker);
+            ctx.lineTo(-6, 12);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.moveTo(-8, 12);
+            ctx.lineTo(-9, 17 + flicker * 0.5);
+            ctx.lineTo(-7, 12);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Right thruster flame
+            ctx.fillStyle = '#ff6600';
+            ctx.beginPath();
+            ctx.moveTo(8, 12);
+            ctx.lineTo(10, 22 + flicker);
+            ctx.lineTo(6, 12);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.moveTo(8, 12);
+            ctx.lineTo(9, 17 + flicker * 0.5);
+            ctx.lineTo(7, 12);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.shadowBlur = 0;
+            
+            // Main body (white mecha rabbit)
+            ctx.fillStyle = '#e8e8f0';
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 1;
+            
+            // Body hull
+            ctx.beginPath();
+            ctx.moveTo(0, -12); // Nose
+            ctx.lineTo(10, 0);
+            ctx.lineTo(12, 10);
+            ctx.lineTo(6, 14);
+            ctx.lineTo(-6, 14);
+            ctx.lineTo(-12, 10);
+            ctx.lineTo(-10, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Side armor plates (darker)
+            ctx.fillStyle = '#c0c0c8';
+            ctx.beginPath();
+            ctx.moveTo(-10, 0);
+            ctx.lineTo(-14, 5);
+            ctx.lineTo(-12, 12);
+            ctx.lineTo(-10, 10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(10, 0);
+            ctx.lineTo(14, 5);
+            ctx.lineTo(12, 12);
+            ctx.lineTo(10, 10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Bunny ears (white with pink inner)
+            ctx.fillStyle = '#f0f0f5';
+            ctx.beginPath();
+            ctx.moveTo(-5, -10);
+            ctx.quadraticCurveTo(-8, -25, -4, -28);
+            ctx.quadraticCurveTo(-1, -25, -3, -10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(5, -10);
+            ctx.quadraticCurveTo(8, -25, 4, -28);
+            ctx.quadraticCurveTo(1, -25, 3, -10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Inner ears (pink)
+            ctx.fillStyle = '#ffaaaa';
+            ctx.beginPath();
+            ctx.moveTo(-4, -12);
+            ctx.quadraticCurveTo(-6, -22, -4, -24);
+            ctx.quadraticCurveTo(-2, -22, -3, -12);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(4, -12);
+            ctx.quadraticCurveTo(6, -22, 4, -24);
+            ctx.quadraticCurveTo(2, -22, 3, -12);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Cyan visor (glowing)
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = '#00ddff';
+            ctx.beginPath();
+            ctx.ellipse(0, -4, 6, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Visor shine
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.ellipse(-2, -5, 2, 1.5, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Thruster housings
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#666';
+            ctx.fillRect(-10, 10, 4, 5);
+            ctx.fillRect(6, 10, 4, 5);
+            
+            ctx.restore();
+        }
+        
+        function drawPawn(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            const t = Date.now() / 100;
+            const flicker = Math.sin(t * 4) * 2;
+            
+            // Thruster flames (small, bottom)
+            ctx.fillStyle = '#ff6600';
+            ctx.beginPath();
+            ctx.moveTo(-4, 10);
+            ctx.lineTo(-5, 16 + flicker);
+            ctx.lineTo(-3, 10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(4, 10);
+            ctx.lineTo(5, 16 + flicker);
+            ctx.lineTo(3, 10);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Inner flame (yellow)
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.moveTo(-4, 10);
+            ctx.lineTo(-4.5, 13 + flicker * 0.5);
+            ctx.lineTo(-3.5, 10);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(4, 10);
+            ctx.lineTo(4.5, 13 + flicker * 0.5);
+            ctx.lineTo(3.5, 10);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Body (silver dome shape)
+            const gradient = ctx.createLinearGradient(-8, -10, 8, 10);
+            gradient.addColorStop(0, '#d0d0d8');
+            gradient.addColorStop(0.3, '#f0f0f5');
+            gradient.addColorStop(0.7, '#a0a0a8');
+            gradient.addColorStop(1, '#707078');
+            
+            ctx.fillStyle = gradient;
+            ctx.strokeStyle = '#505058';
+            ctx.lineWidth = 1;
+            
+            // Base/skirt
+            ctx.beginPath();
+            ctx.moveTo(-8, 8);
+            ctx.lineTo(-6, 12);
+            ctx.lineTo(6, 12);
+            ctx.lineTo(8, 8);
+            ctx.lineTo(6, 4);
+            ctx.lineTo(-6, 4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Main dome body
+            ctx.beginPath();
+            ctx.moveTo(-7, 5);
+            ctx.quadraticCurveTo(-8, 0, -6, -5);
+            ctx.quadraticCurveTo(0, -12, 6, -5);
+            ctx.quadraticCurveTo(8, 0, 7, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Top cap
+            ctx.fillStyle = '#808088';
+            ctx.beginPath();
+            ctx.arc(0, -8, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Red glowing eyes
+            ctx.shadowColor = '#ff0000';
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = '#ff3300';
+            ctx.beginPath();
+            ctx.ellipse(-3, -2, 2, 1.5, -0.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(3, -2, 2, 1.5, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Eye cores (bright)
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.arc(-3, -2, 0.8, 0, Math.PI * 2);
+            ctx.arc(3, -2, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        function drawKnight(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            const t = Date.now() / 100;
+            const flicker = Math.sin(t * 3) * 2;
+            
+            // Thruster flames (tank style, center bottom)
+            ctx.fillStyle = '#ff6600';
+            ctx.beginPath();
+            ctx.moveTo(-3, 12);
+            ctx.lineTo(-5, 20 + flicker);
+            ctx.lineTo(5, 20 + flicker);
+            ctx.lineTo(3, 12);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.moveTo(-2, 12);
+            ctx.lineTo(-3, 16 + flicker * 0.5);
+            ctx.lineTo(3, 16 + flicker * 0.5);
+            ctx.lineTo(2, 12);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Body (dark gray castle/rook style)
+            const gradient = ctx.createLinearGradient(-10, -12, 10, 12);
+            gradient.addColorStop(0, '#505060');
+            gradient.addColorStop(0.3, '#606070');
+            gradient.addColorStop(0.7, '#404050');
+            gradient.addColorStop(1, '#303040');
+            
+            ctx.fillStyle = gradient;
+            ctx.strokeStyle = '#202030';
+            ctx.lineWidth = 1;
+            
+            // Tank treads/base
+            ctx.fillStyle = '#303038';
+            ctx.fillRect(-12, 8, 6, 6);
+            ctx.fillRect(6, 8, 6, 6);
+            
+            // Tread details
+            ctx.strokeStyle = '#404048';
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.moveTo(-11, 9 + i * 2);
+                ctx.lineTo(-7, 9 + i * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(7, 9 + i * 2);
+                ctx.lineTo(11, 9 + i * 2);
+                ctx.stroke();
+            }
+            
+            // Main body (boxy rook shape)
+            ctx.fillStyle = gradient;
+            ctx.strokeStyle = '#202030';
+            ctx.beginPath();
+            ctx.rect(-10, -4, 20, 14);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Castle battlements on top
+            ctx.fillStyle = '#505060';
+            ctx.fillRect(-10, -10, 5, 6);
+            ctx.fillRect(-2, -10, 5, 6);
+            ctx.fillRect(5, -10, 5, 6);
+            
+            ctx.strokeStyle = '#202030';
+            ctx.strokeRect(-10, -10, 5, 6);
+            ctx.strokeRect(-2, -10, 5, 6);
+            ctx.strokeRect(5, -10, 5, 6);
+            
+            // Side lights (yellow)
+            ctx.fillStyle = '#ffcc00';
+            ctx.shadowColor = '#ffcc00';
+            ctx.shadowBlur = 5;
+            ctx.fillRect(-9, 4, 3, 2);
+            ctx.fillRect(6, 4, 3, 2);
+            
+            // Red glowing eyes (angry slits)
+            ctx.shadowColor = '#ff0000';
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = '#ff3300';
+            ctx.beginPath();
+            ctx.moveTo(-6, -2);
+            ctx.lineTo(-2, 0);
+            ctx.lineTo(-6, 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(6, -2);
+            ctx.lineTo(2, 0);
+            ctx.lineTo(6, 2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Eye cores
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.arc(-4, 0, 1, 0, Math.PI * 2);
+            ctx.arc(4, 0, 1, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        function drawBubbleShooter(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            const t = Date.now() / 100;
+            const flicker = Math.sin(t * 3.5) * 2;
+            
+            // Thruster flame (single center)
+            ctx.fillStyle = '#ff6600';
+            ctx.beginPath();
+            ctx.moveTo(-3, 12);
+            ctx.lineTo(0, 22 + flicker);
+            ctx.lineTo(3, 12);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.moveTo(-2, 12);
+            ctx.lineTo(0, 17 + flicker * 0.5);
+            ctx.lineTo(2, 12);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Body (bishop style - pointed top, silver)
+            const gradient = ctx.createLinearGradient(-8, -15, 8, 15);
+            gradient.addColorStop(0, '#c0c0c8');
+            gradient.addColorStop(0.3, '#e0e0e8');
+            gradient.addColorStop(0.7, '#909098');
+            gradient.addColorStop(1, '#606068');
+            
+            ctx.fillStyle = gradient;
+            ctx.strokeStyle = '#404048';
+            ctx.lineWidth = 1;
+            
+            // Base/skirt
+            ctx.beginPath();
+            ctx.moveTo(-8, 8);
+            ctx.lineTo(-6, 14);
+            ctx.lineTo(6, 14);
+            ctx.lineTo(8, 8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Main body (tapered)
+            ctx.beginPath();
+            ctx.moveTo(-8, 8);
+            ctx.lineTo(-6, -4);
+            ctx.lineTo(6, -4);
+            ctx.lineTo(8, 8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Bishop hat/helmet (pointed)
+            ctx.beginPath();
+            ctx.moveTo(-6, -4);
+            ctx.lineTo(-4, -12);
+            ctx.lineTo(0, -18);
+            ctx.lineTo(4, -12);
+            ctx.lineTo(6, -4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Top orb
+            ctx.fillStyle = '#707078';
+            ctx.beginPath();
+            ctx.arc(0, -18, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Chest core (glowing orange like in concept)
+            ctx.shadowColor = '#ff6600';
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = '#ff6600';
+            ctx.beginPath();
+            ctx.arc(0, 4, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.arc(0, 4, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Red glowing eyes
+            ctx.shadowColor = '#ff0000';
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = '#ff3300';
+            ctx.beginPath();
+            ctx.ellipse(-3, -6, 2, 1.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(3, -6, 2, 1.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Eye cores
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.arc(-3, -6, 0.8, 0, Math.PI * 2);
+            ctx.arc(3, -6, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        // BOUNCER - Bouncing ball enemy with high HP
+        function drawBouncer(x, y, enemy) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            const t = Date.now() / 100;
+            const squish = 1 + Math.sin(t) * 0.1; // Slight squish animation
+            
+            // Glow effect
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 15;
+            
+            // Main ball body - electric blue
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 14);
+            gradient.addColorStop(0, '#88ffff');
+            gradient.addColorStop(0.5, '#00ccff');
+            gradient.addColorStop(1, '#0066aa');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 14 * squish, 14 / squish, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Electric arcs
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.shadowBlur = 5;
+            for (let i = 0; i < 3; i++) {
+                const angle = (t + i * 2.1) % (Math.PI * 2);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(Math.cos(angle) * 12, Math.sin(angle) * 12);
+                ctx.stroke();
+            }
+            
+            // Face - determined expression
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#003366';
+            // Eyes (determined slant)
+            ctx.beginPath();
+            ctx.ellipse(-5, -2, 3, 4, -0.3, 0, Math.PI * 2);
+            ctx.ellipse(5, -2, 3, 4, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Eye shine
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(-6, -4, 1.5, 0, Math.PI * 2);
+            ctx.arc(4, -4, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Determined mouth
+            ctx.strokeStyle = '#003366';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-4, 5);
+            ctx.lineTo(4, 5);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        // CHARGER - Enemy that charges at player
+        function drawCharger(x, y, enemy) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            const isCharging = enemy && enemy.isCharging;
+            const t = Date.now() / 100;
+            
+            // Glow when charging
+            if (isCharging) {
+                ctx.shadowColor = '#ff0000';
+                ctx.shadowBlur = 20 + Math.sin(t * 5) * 10;
+            } else {
+                ctx.shadowColor = '#ff6600';
+                ctx.shadowBlur = 8;
+            }
+            
+            // Body - angular/aggressive shape (like a ram)
+            ctx.fillStyle = isCharging ? '#ff3333' : '#cc4444';
+            ctx.beginPath();
+            ctx.moveTo(-15, 0);
+            ctx.lineTo(-10, -12);
+            ctx.lineTo(10, -10);
+            ctx.lineTo(15, 0);
+            ctx.lineTo(10, 10);
+            ctx.lineTo(-10, 12);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.strokeStyle = '#880000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Horns
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath();
+            ctx.moveTo(-8, -10);
+            ctx.lineTo(-18, -18);
+            ctx.lineTo(-12, -8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(-8, 10);
+            ctx.lineTo(-18, 18);
+            ctx.lineTo(-12, 8);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Angry eyes
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.ellipse(2, -3, 4, 3, 0, 0, Math.PI * 2);
+            ctx.ellipse(2, 3, 4, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Pupils - looking forward when charging
+            ctx.fillStyle = isCharging ? '#ff0000' : '#000';
+            ctx.beginPath();
+            ctx.arc(4, -3, 2, 0, Math.PI * 2);
+            ctx.arc(4, 3, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Charge indicator (! above head when about to charge)
+            if (enemy && enemy.chargeTimer > 60 && !isCharging) {
+                ctx.fillStyle = '#ff0';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('!', 0, -22);
+            }
+            
+            // Speed lines when charging
+            if (isCharging) {
+                ctx.strokeStyle = 'rgba(255, 100, 100, 0.5)';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 3; i++) {
+                    const ly = -8 + i * 8;
+                    ctx.beginPath();
+                    ctx.moveTo(-20, ly);
+                    ctx.lineTo(-35 - Math.random() * 10, ly);
+                    ctx.stroke();
+                }
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawShields() {
+            if (shields <= 0) return;
+            
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            
+            // Draw shield rings
+            const time = Date.now() / 500;
+            
+            for (let i = 0; i < shields; i++) {
+                const offset = (time + i * 2.1) % (Math.PI * 2);
+                const alpha = 0.4 + 0.2 * Math.sin(time * 2 + i);
+                
+                ctx.strokeStyle = `rgba(0, 170, 255, ${alpha})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, 18 + i * 4, offset, offset + Math.PI * 1.3);
+                ctx.stroke();
+                
+                // Shield sparkle
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                const sparkleX = Math.cos(offset) * (18 + i * 4);
+                const sparkleY = Math.sin(offset) * (18 + i * 4);
+                ctx.beginPath();
+                ctx.arc(sparkleX, sparkleY, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawBoss() {
+            if (!boss) return;
+            
+            ctx.save();
+            ctx.translate(boss.x, boss.y);
+            
+            const healthPercent = boss.health / boss.maxHealth;
+            boss.animTimer = (boss.animTimer || 0) + 1;
+            
+            // Damage glow for all bosses
+            if (healthPercent < 0.5) {
+                ctx.shadowColor = '#f00';
+                ctx.shadowBlur = 15 + Math.sin(Date.now() / 100) * 8;
+            }
+            
+            // Draw based on boss type
+            if (boss.type === 'mainboss') {
+                drawMainBoss(boss.bossNum, healthPercent, boss.animTimer);
+            } else {
+                drawMiniBoss(healthPercent);
+            }
+            
+            // Health bar
+            ctx.shadowBlur = 0;
+            const barWidth = boss.type === 'mainboss' ? 100 : 80;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(-barWidth/2, 45, barWidth, 8);
+            ctx.fillStyle = healthPercent > 0.3 ? '#f00' : '#ff0';
+            ctx.fillRect(-barWidth/2, 45, barWidth * healthPercent, 8);
+            ctx.strokeStyle = '#666';
+            ctx.strokeRect(-barWidth/2, 45, barWidth, 8);
+            
+            // Boss name for main bosses
+            if (boss.type === 'mainboss') {
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 10px Courier New';
+                ctx.textAlign = 'center';
+                ctx.fillText(MAIN_BOSS_NAMES[boss.bossNum - 1], 0, 62);
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawMiniBoss(entityOrHealthPercent) {
+            // Can be called with a health percent (for main boss) or enemy object (for miniboss2)
+            let healthPercent;
+            
+            if (typeof entityOrHealthPercent === 'number') {
+                healthPercent = entityOrHealthPercent;
+            } else if (entityOrHealthPercent && entityOrHealthPercent.health !== undefined) {
+                const enemy = entityOrHealthPercent;
+                healthPercent = enemy.health / (enemy.maxHealth || 80);
+                // For enemy mini-bosses, we draw at their position
+                ctx.save();
+                ctx.translate(enemy.x, enemy.y);
+            }
+            
+            const t = Date.now() / 100;
+            const damaged = healthPercent < 0.3;
+            
+            // Leg thruster flames (4 legs)
+            const flicker = Math.sin(t * 4) * 3;
+            ctx.fillStyle = '#ff6600';
+            // Back legs
+            ctx.beginPath();
+            ctx.moveTo(-25, 25);
+            ctx.lineTo(-27, 38 + flicker);
+            ctx.lineTo(-23, 25);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(20, 25);
+            ctx.lineTo(22, 38 + flicker);
+            ctx.lineTo(18, 25);
+            ctx.closePath();
+            ctx.fill();
+            // Front legs
+            ctx.beginPath();
+            ctx.moveTo(-10, 28);
+            ctx.lineTo(-12, 40 + flicker * 0.8);
+            ctx.lineTo(-8, 28);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(5, 28);
+            ctx.lineTo(7, 40 + flicker * 0.8);
+            ctx.lineTo(3, 28);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Inner flames (yellow)
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.moveTo(-25, 25);
+            ctx.lineTo(-26, 32 + flicker * 0.5);
+            ctx.lineTo(-24, 25);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(20, 25);
+            ctx.lineTo(21, 32 + flicker * 0.5);
+            ctx.lineTo(19, 25);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Cape (flowing red, behind body)
+            ctx.fillStyle = damaged ? '#aa3333' : '#cc2222';
+            ctx.beginPath();
+            ctx.moveTo(15, -15);
+            ctx.quadraticCurveTo(35 + Math.sin(t) * 5, -5, 40 + Math.sin(t * 1.2) * 8, 15);
+            ctx.quadraticCurveTo(35, 25 + Math.sin(t * 0.8) * 3, 25, 20);
+            ctx.lineTo(20, 0);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Armored legs (dark gray metal)
+            const metalGradient = ctx.createLinearGradient(-30, 0, 30, 0);
+            metalGradient.addColorStop(0, '#404050');
+            metalGradient.addColorStop(0.3, '#606070');
+            metalGradient.addColorStop(0.7, '#505060');
+            metalGradient.addColorStop(1, '#303040');
+            
+            ctx.fillStyle = metalGradient;
+            ctx.strokeStyle = '#202030';
+            ctx.lineWidth = 1;
+            
+            // Back legs
+            ctx.fillRect(-28, 10, 8, 18);
+            ctx.strokeRect(-28, 10, 8, 18);
+            ctx.fillRect(17, 10, 8, 18);
+            ctx.strokeRect(17, 10, 8, 18);
+            
+            // Front legs
+            ctx.fillRect(-13, 12, 7, 18);
+            ctx.strokeRect(-13, 12, 7, 18);
+            ctx.fillRect(2, 12, 7, 18);
+            ctx.strokeRect(2, 12, 7, 18);
+            
+            // Armored body
+            ctx.fillStyle = damaged ? '#503040' : '#404050';
+            ctx.beginPath();
+            ctx.moveTo(-25, 5);
+            ctx.lineTo(-20, -10);
+            ctx.lineTo(15, -15);
+            ctx.lineTo(22, 0);
+            ctx.lineTo(20, 15);
+            ctx.lineTo(-22, 15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Armor plates detail
+            ctx.strokeStyle = '#606070';
+            ctx.beginPath();
+            ctx.moveTo(-15, -5);
+            ctx.lineTo(10, -8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-18, 5);
+            ctx.lineTo(15, 3);
+            ctx.stroke();
+            
+            // Chest core (glowing orange)
+            ctx.shadowColor = '#ff6600';
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = '#ff6600';
+            ctx.beginPath();
+            ctx.arc(-5, 2, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.arc(-5, 2, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Neck armor
+            ctx.fillStyle = metalGradient;
+            ctx.beginPath();
+            ctx.moveTo(-20, -10);
+            ctx.lineTo(-30, -25);
+            ctx.lineTo(-22, -28);
+            ctx.lineTo(-15, -15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#202030';
+            ctx.stroke();
+            
+            // Armored head
+            ctx.beginPath();
+            ctx.moveTo(-30, -25);
+            ctx.lineTo(-45, -20);
+            ctx.lineTo(-48, -28);
+            ctx.lineTo(-38, -35);
+            ctx.lineTo(-25, -32);
+            ctx.lineTo(-22, -28);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Horn (silver/metallic)
+            ctx.fillStyle = '#a0a0a8';
+            ctx.beginPath();
+            ctx.moveTo(-48, -28);
+            ctx.lineTo(-58, -32);
+            ctx.lineTo(-48, -24);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Red glowing eye
+            ctx.shadowColor = '#ff0000';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = '#ff3300';
+            ctx.beginPath();
+            ctx.ellipse(-38, -27, 4, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.arc(-38, -27, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Health bar for miniboss2
+            if (typeof entityOrHealthPercent !== 'number') {
+                ctx.shadowBlur = 0;
+                const barWidth = 70;
+                const barHeight = 6;
+                ctx.fillStyle = '#333';
+                ctx.fillRect(-barWidth/2, -50, barWidth, barHeight);
+                ctx.fillStyle = healthPercent > 0.3 ? '#ff0' : '#f00';
+                ctx.fillRect(-barWidth/2, -50, barWidth * healthPercent, barHeight);
+                ctx.restore();
+            }
+        }
+        
+        function drawMainBoss(bossNum, healthPercent, animTimer) {
+            switch(bossNum) {
+                case 1: drawBoss1_StandingHorse(healthPercent, animTimer); break;
+                case 2: drawBoss2_GallopingHorse(healthPercent, animTimer); break;
+                case 3: drawBoss3_BabyHorse(healthPercent, animTimer); break;
+                case 4: drawBoss4_BasketballHorse(healthPercent, animTimer); break;
+            }
+        }
+        
+        
+        // ═══════════════════════════════════════
+        // SPRITE-BASED BOSS DRAWING FUNCTIONS
+        // ═══════════════════════════════════════
+        
+        // Boss 1: Standing cute horse (top-left image)
+        function drawBoss1_StandingHorse(hp, t) {
+            const damaged = hp < 0.3;
+            const wiggle = Math.sin(t / 15) * 3;
+            const bounce = Math.sin(t / 10) * 2;
+            const size = BOSS_SIZES[1];
+            const sprite = BOSS_SPRITES[1];
+            
+            // Draw damage flash
+            if (damaged && Math.sin(t / 2) > 0) {
+                ctx.globalAlpha = 0.7;
+            }
+            
+            // Apply wiggle animation
+            ctx.save();
+            ctx.rotate(wiggle * 0.02);
+            ctx.translate(0, bounce);
+            
+            // Draw the sprite
+            if (bossSpriteLoaded) {
+                ctx.drawImage(bossSprite, 
+                    sprite.x, sprite.y, sprite.w, sprite.h,
+                    -size.w/2, -size.h/2, size.w, size.h);
+            } else {
+                // Fallback if image not loaded
+                ctx.fillStyle = '#d4a574';
+                ctx.fillRect(-size.w/2, -size.h/2, size.w, size.h);
+            }
+            
+            ctx.restore();
+            ctx.globalAlpha = 1;
+            
+            // Add glow effect when damaged
+            if (damaged) {
+                ctx.shadowColor = '#ff0000';
+                ctx.shadowBlur = 15 + Math.sin(t / 3) * 5;
+                ctx.strokeStyle = '#ff0000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-size.w/2, -size.h/2, size.w, size.h);
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        // Boss 2: Galloping/Running horse (top-right image)
+        function drawBoss2_GallopingHorse(hp, t) {
+            const damaged = hp < 0.3;
+            const runBob = Math.sin(t / 5) * 4;
+            const tilt = Math.sin(t / 8) * 0.05;
+            const size = BOSS_SIZES[2];
+            const sprite = BOSS_SPRITES[2];
+            
+            if (damaged && Math.sin(t / 2) > 0) {
+                ctx.globalAlpha = 0.7;
+            }
+            
+            ctx.save();
+            ctx.rotate(tilt);
+            ctx.translate(0, runBob);
+            
+            if (bossSpriteLoaded) {
+                ctx.drawImage(bossSprite, 
+                    sprite.x, sprite.y, sprite.w, sprite.h,
+                    -size.w/2, -size.h/2, size.w, size.h);
+            } else {
+                ctx.fillStyle = '#c4956a';
+                ctx.fillRect(-size.w/2, -size.h/2, size.w, size.h);
+            }
+            
+            ctx.restore();
+            ctx.globalAlpha = 1;
+            
+            if (damaged) {
+                ctx.shadowColor = '#ff0000';
+                ctx.shadowBlur = 15 + Math.sin(t / 3) * 5;
+                ctx.strokeStyle = '#ff0000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-size.w/2, -size.h/2, size.w, size.h);
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        // Boss 3: Baby horse sitting (bottom-left image)
+        function drawBoss3_BabyHorse(hp, t) {
+            const damaged = hp < 0.3;
+            const wiggle = Math.sin(t / 12) * 4;
+            const headBob = Math.sin(t / 8) * 2;
+            const size = BOSS_SIZES[3];
+            const sprite = BOSS_SPRITES[3];
+            
+            if (damaged && Math.sin(t / 2) > 0) {
+                ctx.globalAlpha = 0.7;
+            }
+            
+            ctx.save();
+            ctx.rotate(wiggle * 0.03);
+            ctx.translate(0, headBob);
+            
+            if (bossSpriteLoaded) {
+                ctx.drawImage(bossSprite, 
+                    sprite.x, sprite.y, sprite.w, sprite.h,
+                    -size.w/2, -size.h/2, size.w, size.h);
+            } else {
+                ctx.fillStyle = '#8B6914';
+                ctx.fillRect(-size.w/2, -size.h/2, size.w, size.h);
+            }
+            
+            ctx.restore();
+            ctx.globalAlpha = 1;
+            
+            if (damaged) {
+                ctx.shadowColor = '#ff0000';
+                ctx.shadowBlur = 15 + Math.sin(t / 3) * 5;
+                ctx.strokeStyle = '#ff0000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-size.w/2, -size.h/2, size.w, size.h);
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        // Boss 4: Basketball horse - BIG but can still move! (bottom-right image)
+        function drawBoss4_BasketballHorse(hp, t) {
+            const damaged = hp < 0.3;
+            const bounce = Math.abs(Math.sin(t / 6)) * 5;
+            const tilt = Math.sin(t / 10) * 0.04;
+            const pulse = Math.sin(t / 4) * 3;
+            const size = BOSS_SIZES[4];
+            const sprite = BOSS_SPRITES[4];
+            
+            if (damaged && Math.sin(t / 2) > 0) {
+                ctx.globalAlpha = 0.7;
+            }
+            
+            ctx.save();
+            ctx.rotate(tilt);
+            ctx.translate(0, bounce);
+            ctx.scale(1 + pulse * 0.01, 1 + pulse * 0.01);
+            
+            if (bossSpriteLoaded) {
+                ctx.drawImage(bossSprite, 
+                    sprite.x, sprite.y, sprite.w, sprite.h,
+                    -size.w/2, -size.h/2, size.w, size.h);
+            } else {
+                ctx.fillStyle = '#5a3a1a';
+                ctx.fillRect(-size.w/2, -size.h/2, size.w, size.h);
+            }
+            
+            ctx.restore();
+            ctx.globalAlpha = 1;
+            
+            // Boss 4 has extra intimidation glow
+            ctx.shadowColor = damaged ? '#ff0000' : '#ff6600';
+            ctx.shadowBlur = 10 + pulse;
+            ctx.strokeStyle = damaged ? '#ff0000' : '#ff8800';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-size.w/2 - 2, -size.h/2 - 2, size.w + 4, size.h + 4);
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawBullets() {
+            // Player bullets
+            playerBullets.forEach(b => {
+                ctx.fillStyle = b.color;
+                ctx.shadowColor = b.color;
+                ctx.shadowBlur = 8;
+                
+                if (b.type === 'homing') {
+                    // Missile shape
+                    ctx.save();
+                    ctx.translate(b.x, b.y);
+                    ctx.fillRect(-2, -6, 4, 12);
+                    ctx.beginPath();
+                    ctx.moveTo(0, -10);
+                    ctx.lineTo(-3, -6);
+                    ctx.lineTo(3, -6);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                } else {
+                    ctx.beginPath();
+                    ctx.ellipse(b.x, b.y, 3, 6, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+            
+            // AMAZING LASER BEAM - multi-layered glow effect
+            if (laserActive && currentWeapon === 'LASER') {
+                const level = getWeaponLevel();
+                const t = Date.now() / 50; // Animation timer
+                const baseWidth = laserWidth;
+                const laserY = player.y - 20;
+                
+                // Layer 1: Outer glow (widest, most transparent)
+                ctx.save();
+                const outerGlow = ctx.createLinearGradient(player.x - baseWidth * 3, 0, player.x + baseWidth * 3, 0);
+                outerGlow.addColorStop(0, 'rgba(255, 0, 255, 0)');
+                outerGlow.addColorStop(0.3, 'rgba(180, 0, 255, 0.15)');
+                outerGlow.addColorStop(0.5, 'rgba(255, 100, 255, 0.3)');
+                outerGlow.addColorStop(0.7, 'rgba(180, 0, 255, 0.15)');
+                outerGlow.addColorStop(1, 'rgba(255, 0, 255, 0)');
+                ctx.fillStyle = outerGlow;
+                ctx.fillRect(player.x - baseWidth * 3, 0, baseWidth * 6, laserY);
+                
+                // Layer 2: Mid glow with flicker
+                const flicker = 0.7 + Math.sin(t * 3) * 0.3;
+                const midGlow = ctx.createLinearGradient(player.x - baseWidth * 1.5, 0, player.x + baseWidth * 1.5, 0);
+                midGlow.addColorStop(0, 'rgba(255, 0, 255, 0)');
+                midGlow.addColorStop(0.2, `rgba(255, 50, 255, ${0.4 * flicker})`);
+                midGlow.addColorStop(0.5, `rgba(255, 150, 255, ${0.7 * flicker})`);
+                midGlow.addColorStop(0.8, `rgba(255, 50, 255, ${0.4 * flicker})`);
+                midGlow.addColorStop(1, 'rgba(255, 0, 255, 0)');
+                ctx.fillStyle = midGlow;
+                ctx.fillRect(player.x - baseWidth * 1.5, 0, baseWidth * 3, laserY);
+                
+                // Layer 3: Inner beam with energy pulses
+                const innerGlow = ctx.createLinearGradient(player.x - baseWidth, 0, player.x + baseWidth, 0);
+                innerGlow.addColorStop(0, 'rgba(255, 0, 255, 0)');
+                innerGlow.addColorStop(0.3, 'rgba(255, 100, 255, 0.9)');
+                innerGlow.addColorStop(0.5, 'rgba(255, 255, 255, 1)');
+                innerGlow.addColorStop(0.7, 'rgba(255, 100, 255, 0.9)');
+                innerGlow.addColorStop(1, 'rgba(255, 0, 255, 0)');
+                ctx.fillStyle = innerGlow;
+                ctx.fillRect(player.x - baseWidth, 0, baseWidth * 2, laserY);
+                
+                // Layer 4: Hot core (white center)
+                const coreWidth = Math.max(2, baseWidth * 0.3);
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = '#ff00ff';
+                ctx.shadowBlur = 15;
+                ctx.fillRect(player.x - coreWidth/2, 0, coreWidth, laserY);
+                
+                // Layer 5: Energy pulses traveling up the beam
+                ctx.shadowBlur = 20;
+                for (let i = 0; i < 3; i++) {
+                    const pulseY = (laserY - ((t * 15 + i * laserY/3) % laserY));
+                    const pulseAlpha = 0.8 - (pulseY / laserY) * 0.5;
+                    const pulseWidth = baseWidth * (0.5 + Math.sin(t + i) * 0.3);
+                    
+                    ctx.fillStyle = `rgba(255, 200, 255, ${pulseAlpha})`;
+                    ctx.beginPath();
+                    ctx.ellipse(player.x, pulseY, pulseWidth, 4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Layer 6: Sparkles along the beam at higher levels
+                if (level >= 3) {
+                    ctx.shadowBlur = 8;
+                    for (let i = 0; i < level * 2; i++) {
+                        const sparkY = Math.random() * laserY;
+                        const sparkX = player.x + (Math.random() - 0.5) * baseWidth;
+                        const sparkSize = 1 + Math.random() * 2;
+                        ctx.fillStyle = `rgba(255, 255, 255, ${0.5 + Math.random() * 0.5})`;
+                        ctx.beginPath();
+                        ctx.arc(sparkX, sparkY, sparkSize, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                
+                // Impact point at top of screen
+                ctx.shadowColor = '#ff88ff';
+                ctx.shadowBlur = 30;
+                ctx.fillStyle = 'rgba(255, 200, 255, 0.8)';
+                ctx.beginPath();
+                ctx.ellipse(player.x, 5, baseWidth * 1.5 + Math.sin(t * 2) * 3, 8, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+            
+            ctx.shadowBlur = 0;
+            
+            // Enemy bullets
+            enemyBullets.forEach(b => {
+                if (b.isBubble) {
+                    // Big bubble bullet
+                    const size = b.size || 10;
+                    ctx.fillStyle = 'rgba(255, 100, 50, 0.7)';
+                    ctx.strokeStyle = '#ff6600';
+                    ctx.lineWidth = 2;
+                    ctx.shadowColor = '#ff6600';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Bubble shine
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(b.x - size/3, b.y - size/3, size/4, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Normal bullet
+                    ctx.fillStyle = '#ff4444';
+                    ctx.shadowColor = '#ff4444';
+                    ctx.shadowBlur = 6;
+                    ctx.beginPath();
+                    ctx.ellipse(b.x, b.y, 3, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+            
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawPowerUps() {
+            powerUps.forEach(p => {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                
+                const color = getPowerUpColor(p.type);
+                const size = 28; // Bigger size
+                
+                // Pulsing glow effect
+                const pulse = Math.sin(Date.now() / 150) * 5;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 20 + pulse;
+                
+                // Rounded box background
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                
+                // Draw rounded rect
+                const r = 6;
+                ctx.beginPath();
+                ctx.moveTo(-size/2 + r, -size/2);
+                ctx.lineTo(size/2 - r, -size/2);
+                ctx.quadraticCurveTo(size/2, -size/2, size/2, -size/2 + r);
+                ctx.lineTo(size/2, size/2 - r);
+                ctx.quadraticCurveTo(size/2, size/2, size/2 - r, size/2);
+                ctx.lineTo(-size/2 + r, size/2);
+                ctx.quadraticCurveTo(-size/2, size/2, -size/2, size/2 - r);
+                ctx.lineTo(-size/2, -size/2 + r);
+                ctx.quadraticCurveTo(-size/2, -size/2, -size/2 + r, -size/2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                
+                // Icon - much bigger and bolder
+                ctx.fillStyle = color;
+                ctx.font = 'bold 16px Courier New';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(getPowerUpIcon(p.type), 0, -2);
+                
+                // Weapon name label below (smaller)
+                ctx.shadowBlur = 0;
+                ctx.font = '8px Courier New';
+                ctx.fillStyle = color;
+                ctx.fillText(getPowerUpName(p.type), 0, 10);
+                
+                ctx.restore();
+            });
+        }
+        
+        function getPowerUpColor(type) {
+            switch(type) {
+                case 'BEAM': return '#00ffff';
+                case 'LASER': return '#ff00ff';
+                case 'SPREAD': return '#ffff00';
+                case 'HOMING': return '#00ff00';
+                case 'LEVELUP': return '#ffffff';
+                case 'SPECIAL': return '#ffd700';
+                case 'SHIELD': return '#00aaff';
+                case 'HEART': return '#ff6b9d';
+                default: return '#fff';
+            }
+        }
+        
+        function getPowerUpIcon(type) {
+            switch(type) {
+                case 'BEAM': return '≡';
+                case 'LASER': return '↯';
+                case 'SPREAD': return '⁂';
+                case 'HOMING': return '◎';
+                case 'LEVELUP': return '⬆';
+                case 'SPECIAL': return '★';
+                case 'SHIELD': return '◇';
+                case 'HEART': return '♥';
+                default: return '?';
+            }
+        }
+        
+        function getPowerUpName(type) {
+            switch(type) {
+                case 'BEAM': return 'BEAM';
+                case 'LASER': return 'LASER';
+                case 'SPREAD': return 'SPREAD';
+                case 'HOMING': return 'HOME';
+                case 'LEVELUP': return 'LV UP';
+                case 'SPECIAL': return 'BOMB';
+                case 'SHIELD': return 'SHIELD';
+                case 'HEART': return 'LIFE';
+                default: return '';
+            }
+        }
+        
+        function drawParticles() {
+            particles.forEach(p => {
+                if (p.type === 'flash') {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                } else if (p.type === 'sparkle') {
+                    // Bright sparkle with glow
+                    const alpha = p.life / 20;
+                    ctx.save();
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 8;
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = alpha;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size || 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Bright center
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, (p.size || 2) * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                    ctx.globalAlpha = 1;
+                } else if (p.type === 'bossFlash') {
+                    // Boss damage flash - bright orange/yellow burst
+                    const alpha = p.life / 8;
+                    const size = p.size * (1 + (8 - p.life) * 0.3);
+                    ctx.save();
+                    ctx.shadowColor = '#ff6600';
+                    ctx.shadowBlur = 30;
+                    ctx.globalAlpha = alpha;
+                    const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size);
+                    gradient.addColorStop(0, '#ffffff');
+                    gradient.addColorStop(0.3, '#ffff00');
+                    gradient.addColorStop(0.6, '#ff6600');
+                    gradient.addColorStop(1, 'rgba(255, 100, 0, 0)');
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                    ctx.globalAlpha = 1;
+                } else if (p.type === 'explosionRing') {
+                    // Expanding ring
+                    const alpha = p.life / 15;
+                    const size = p.size + (15 - p.life) * 4;
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    ctx.strokeStyle = '#ff8800';
+                    ctx.lineWidth = 3;
+                    ctx.shadowColor = '#ff6600';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.restore();
+                    ctx.globalAlpha = 1;
+                } else {
+                    // Regular particle
+                    const size = p.size || 4;
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.life / 20;
+                    ctx.fillRect(p.x - size/2, p.y - size/2, size, size);
+                    ctx.globalAlpha = 1;
+                }
+            });
+        }
+        
+        // ═══════════════════════════════════════
+        // UPDATE FUNCTIONS
+        // ═══════════════════════════════════════
+        function update(deltaTime) {
+            if (!gameStarted || gameOver || victory) return;
+            
+            updateStars();
+            updateNotifications();
+            
+            // Player movement
+            if (keys.left && player.x > 25) {
+                player.x -= player.speed;
+            }
+            if (keys.right && player.x < canvas.width - 25) {
+                player.x += player.speed;
+            }
+            
+            // Auto-fire
+            autoFireTimer += deltaTime;
+            const fireRate = WEAPONS[currentWeapon].fireRate;
+            if (autoFireTimer >= fireRate) {
+                autoFireTimer = 0;
+                if (currentWeapon !== 'LASER') {
+                    fireWeapon();
+                }
+            }
+            
+            // Laser is continuous
+            if (currentWeapon === 'LASER') {
+                const level = getWeaponLevel();
+                laserActive = true;
+                laserWidth = level * 3 + 4;
+                
+                // Laser damage scales with level: 0.02, 0.03, 0.05, 0.07, 0.1, 0.15, 0.2
+                const laserDamage = [0.02, 0.03, 0.05, 0.07, 0.1, 0.15, 0.2][level - 1] || 0.02;
+                const bossDamage = laserDamage * 0.5;
+                
+                // Check laser collision
+                for (let i = enemies.length - 1; i >= 0; i--) {
+                    const enemy = enemies[i];
+                    if (Math.abs(enemy.x - player.x) < laserWidth + enemy.width/2) {
+                        enemy.health -= laserDamage;
+                        // Occasional sparkle while laser hits
+                        if (Math.random() < 0.1) {
+                            spawnHitSparkles(enemy.x + (Math.random()-0.5)*10, enemy.y, '#ff00ff');
+                        }
+                        if (enemy.health <= 0) {
+                            score += enemy.points;
+                            spawnParticles(enemy.x, enemy.y, '#f0f');
+                            if (enemy.hasPowerUp) spawnPowerUp(enemy.x, enemy.y);
+                            enemies.splice(i, 1);
+                            updateUI();
+                        }
+                    }
+                }
+                
+                if (boss && Math.abs(boss.x - player.x) < laserWidth + boss.width/2) {
+                    boss.health -= bossDamage;
+                    // Boss sparkles and occasional explosion
+                    if (Math.random() < 0.08) {
+                        spawnHitSparkles(boss.x + (Math.random()-0.5)*30, boss.y + (Math.random()-0.5)*20, '#ff00ff');
+                    }
+                    if (Math.random() < 0.02) {
+                        spawnBossExplosion(boss.x + (Math.random()-0.5)*40, boss.y + (Math.random()-0.5)*30);
+                    }
+                    if (boss.health <= 0) {
+                        score += boss.points;
+                        // Big death explosions
+                        for (let i = 0; i < 5; i++) {
+                            spawnBossExplosion(
+                                boss.x + (Math.random() - 0.5) * 60,
+                                boss.y + (Math.random() - 0.5) * 40
+                            );
+                        }
+                        spawnParticles(boss.x, boss.y, '#ff0');
+                        
+                        if (boss.type === 'mainboss') {
+                            gameSpeed += 0.1;
+                            showNotification('SPEED UP! ' + Math.round(gameSpeed * 100) + '%', '#ff6600');
+                        }
+                        
+                        boss = null;
+                        bossActive = false;
+                        
+                        wave++;
+                        if (wave > TOTAL_WAVES) {
+                            showVictory();
+                        } else {
+                            const allBossWaves = [...MINI_BOSS_WAVES, ...MAIN_BOSS_WAVES];
+                            if (allBossWaves.includes(wave - 1)) {
+                                showNotification(getBossDefeatMessage(wave - 1), '#00ff00');
+                            }
+                            updateUI();
+                            waveTransitioning = true;
+                            setTimeout(() => initWave(wave), 1500);
+                        }
+                    }
+                    updateUI();
+                }
+            } else {
+                laserActive = false;
+            }
+            
+            // Special attack
+            if (keys.special) {
+                useSpecialAttack();
+                keys.special = false;
+            }
+            
+            // Update player bullets
+            playerBullets = playerBullets.filter(b => {
+                // Movement
+                b.y -= b.speed;
+                if (b.dx) b.x += b.dx;
+                
+                // Improved homing logic - prioritizes closest target, tracks better
+                if (b.type === 'homing' && (enemies.length > 0 || boss)) {
+                    // Find best target - prioritize boss if close, otherwise closest enemy
+                    let target = null;
+                    let bestScore = Infinity;
+                    
+                    // Check boss
+                    if (boss) {
+                        const dist = Math.hypot(boss.x - b.x, boss.y - b.y);
+                        bestScore = dist * 0.7; // Boss gets priority bonus
+                        target = boss;
+                    }
+                    
+                    // Check enemies (including second mini-boss)
+                    enemies.forEach(e => {
+                        const dist = Math.hypot(e.x - b.x, e.y - b.y);
+                        // Prioritize targets that are ahead of the missile
+                        const ahead = e.y < b.y ? 0.8 : 1.2;
+                        if (dist * ahead < bestScore) {
+                            bestScore = dist * ahead;
+                            target = e;
+                        }
+                    });
+                    
+                    if (target) {
+                        const turnSpeed = b.turnSpeed || 0.15;
+                        const angle = Math.atan2(target.y - b.y, target.x - b.x);
+                        // Smooth tracking with adjustable turn speed
+                        b.x += Math.cos(angle) * b.speed * turnSpeed * 2;
+                        b.y += Math.sin(angle) * b.speed * turnSpeed * 2;
+                    }
+                }
+                
+                return b.y > -10 && b.x > -10 && b.x < canvas.width + 10;
+            });
+            
+            // Update enemy bullets
+            enemyBullets = enemyBullets.filter(b => {
+                b.y += b.speed;
+                if (b.dx) b.x += b.dx;
+                return b.y < canvas.height + 10;
+            });
+            
+            // Update power-ups
+            powerUps = powerUps.filter(p => {
+                p.y += p.speed;
+                
+                // Collect
+                if (Math.abs(p.x - player.x) < 25 && Math.abs(p.y - player.y) < 25) {
+                    collectPowerUp(p);
+                    return false;
+                }
+                
+                return p.y < canvas.height + 20;
+            });
+            
+            // Update particles
+            particles = particles.filter(p => {
+                if (p.type === 'flash') {
+                    p.alpha -= 0.05;
+                    p.duration--;
+                    return p.duration > 0;
+                } else if (p.type === 'bossFlash' || p.type === 'explosionRing') {
+                    // Static position particles - just decrease life
+                    p.life--;
+                    return p.life > 0;
+                } else {
+                    // Moving particles
+                    p.x += (p.dx || 0);
+                    p.y += (p.dy || 0);
+                    p.life--;
+                    return p.life > 0;
+                }
+            });
+            
+            // Enemy movement
+            let moveDown = false;
+            let direction = 1;
+            
+            enemies.forEach(enemy => {
+                if (enemy.x <= 25 || enemy.x >= canvas.width - 25) {
+                    moveDown = true;
+                    direction = enemy.x <= 25 ? 1 : -1;
+                }
+            });
+            
+            enemies.forEach(enemy => {
+                // Special handling for miniboss2 (second mini-boss)
+                if (enemy.type === 'miniboss2') {
+                    // Move horizontally like the main boss
+                    enemy.x += (enemy.direction || 1) * 0.5 * gameSpeed;
+                    if (enemy.x <= 80 || enemy.x >= canvas.width - 80) {
+                        enemy.direction = (enemy.direction || 1) * -1;
+                    }
+                    
+                    // Shooting for second mini-boss
+                    enemy.attackTimer = (enemy.attackTimer || 0) + 1;
+                    if (enemy.attackTimer > 80 && Math.random() < 0.02) {
+                        enemy.attackTimer = 0;
+                        enemyBullets.push({
+                            x: enemy.x,
+                            y: enemy.y + 30,
+                            speed: 1.5,
+                            dx: (Math.random() - 0.5) * 0.5
+                        });
+                    }
+                } else if (enemy.type === BOUNCER) {
+                    // BOUNCER: Bounces around the play area like a ball
+                    enemy.x += enemy.dx * gameSpeed;
+                    enemy.y += enemy.dy * gameSpeed;
+                    
+                    // Bounce off walls
+                    if (enemy.x <= 20 || enemy.x >= canvas.width - 20) {
+                        enemy.dx *= -1;
+                        enemy.x = Math.max(20, Math.min(canvas.width - 20, enemy.x));
+                        spawnHitSparkles(enemy.x, enemy.y, '#00ffff');
+                    }
+                    // Bounce off top and stay in upper portion
+                    if (enemy.y <= 20) {
+                        enemy.dy = Math.abs(enemy.dy);
+                        enemy.y = 20;
+                    }
+                    if (enemy.y >= canvas.height * 0.6) {
+                        enemy.dy = -Math.abs(enemy.dy);
+                        enemy.y = canvas.height * 0.6;
+                    }
+                    
+                    // Occasionally shoot
+                    if (Math.random() < 0.008 * gameSpeed) {
+                        enemyBullets.push({
+                            x: enemy.x,
+                            y: enemy.y + 15,
+                            speed: 1.5,
+                            dx: (Math.random() - 0.5) * 0.8
+                        });
+                    }
+                } else if (enemy.type === CHARGER) {
+                    // CHARGER: Waits, then charges at player's position
+                    enemy.chargeTimer = (enemy.chargeTimer || 0) + 1;
+                    
+                    if (!enemy.isCharging) {
+                        // Hovering movement
+                        enemy.x += Math.sin(Date.now() / 500 + enemy.x) * 0.5 * gameSpeed;
+                        enemy.y = enemy.originalY + Math.sin(Date.now() / 300) * 5;
+                        
+                        // Start charging after timer
+                        if (enemy.chargeTimer > 100) {
+                            enemy.isCharging = true;
+                            enemy.chargeTargetX = player.x;
+                            enemy.chargeTargetY = player.y - 30;
+                            enemy.chargeTimer = 0;
+                            // Show warning
+                            spawnHitSparkles(enemy.x, enemy.y, '#ff0000');
+                        }
+                    } else {
+                        // Charging! Move toward target
+                        const dx = enemy.chargeTargetX - enemy.x;
+                        const dy = enemy.chargeTargetY - enemy.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (dist > 5) {
+                            const speed = 5 * gameSpeed;
+                            enemy.x += (dx / dist) * speed;
+                            enemy.y += (dy / dist) * speed;
+                        } else {
+                            // Reached target, return to original position
+                            enemy.isCharging = false;
+                            enemy.chargeTimer = -50; // Brief cooldown
+                        }
+                        
+                        // Stop charging if goes off screen
+                        if (enemy.y > canvas.height * 0.7) {
+                            enemy.isCharging = false;
+                            enemy.y = enemy.originalY;
+                            enemy.chargeTimer = -30;
+                        }
+                    }
+                } else {
+                    // Regular enemy movement
+                    if (moveDown) {
+                        enemy.y += 6 * gameSpeed;
+                        enemy.moveDir = direction;
+                    }
+                    enemy.x += (enemy.moveDir || 1) * (0.22 + wave * 0.03) * gameSpeed;
+                }
+            });
+            
+            // Boss movement
+            if (boss) {
+                boss.x += boss.speed * boss.direction * gameSpeed;
+                if (boss.x <= 60 || boss.x >= canvas.width - 60) {
+                    boss.direction *= -1;
+                }
+                
+                // Speed up slightly when damaged (less aggressive)
+                const baseSpeed = boss.type === 'mainboss' ? 
+                    [0.6, 0.7, 0.8, 0.9][boss.bossNum - 1] : 0.6;
+                if (boss.health < boss.maxHealth * 0.5) boss.speed = baseSpeed * 1.2;
+                if (boss.health < boss.maxHealth * 0.25) boss.speed = baseSpeed * 1.4;
+            }
+            
+            // Difficulty scaling: 50% at wave 1, 100% at wave 12
+            const difficultyScale = getDifficultyScale(wave);
+            
+            // Enemy shooting - rate scales from 50% to 100% based on wave
+            const baseShootRate = 0.012 + wave * 0.001;
+            if (enemies.length > 0 && Math.random() < baseShootRate * difficultyScale * gameSpeed) {
+                const shooter = enemies[Math.floor(Math.random() * enemies.length)];
+                
+                if (shooter.type === BUBBLE_SHOOTER) {
+                    // Bubble shooter fires big slow bubble
+                    enemyBullets.push({
+                        x: shooter.x,
+                        y: shooter.y + 15,
+                        speed: 0.8 * gameSpeed,
+                        isBubble: true,
+                        size: 12
+                    });
+                } else {
+                    // Normal enemy bullet - speed also scales with difficulty
+                    enemyBullets.push({
+                        x: shooter.x,
+                        y: shooter.y + 15,
+                        speed: (1.2 + wave * 0.08) * difficultyScale * gameSpeed
+                    });
+                }
+            }
+            
+            // Boss shooting - rate scales with difficulty
+            if (boss && Math.random() < 0.012 * difficultyScale * gameSpeed) {
+                // Normal spread shot
+                for (let i = -1; i <= 1; i++) {
+                    enemyBullets.push({
+                        x: boss.x + i * 25,
+                        y: boss.y + 35,
+                        speed: 1.6,
+                        dx: i * 0.5
+                    });
+                }
+            }
+            
+            // Boss bubble attack (less frequent)
+            if (boss && Math.random() < 0.005) {
+                enemyBullets.push({
+                    x: boss.x,
+                    y: boss.y + 40,
+                    speed: 1.2,
+                    isBubble: true,
+                    size: 16
+                });
+            }
+            
+            // Collision: Player bullets → Enemies
+            for (let bi = playerBullets.length - 1; bi >= 0; bi--) {
+                const bullet = playerBullets[bi];
+                
+                for (let ei = enemies.length - 1; ei >= 0; ei--) {
+                    const enemy = enemies[ei];
+                    if (Math.abs(bullet.x - enemy.x) < enemy.width &&
+                        Math.abs(bullet.y - enemy.y) < enemy.height) {
+                        enemy.health -= bullet.damage;
+                        playerBullets.splice(bi, 1);
+                        
+                        // Hit sparkle effect on every hit!
+                        spawnHitSparkles(bullet.x, bullet.y, bullet.color);
+                        
+                        if (enemy.health <= 0) {
+                            score += enemy.points;
+                            spawnParticles(enemy.x, enemy.y, bullet.color);
+                            if (enemy.hasPowerUp) spawnPowerUp(enemy.x, enemy.y);
+                            enemies.splice(ei, 1);
+                            updateUI();
+                        }
+                        break;
+                    }
+                }
+                
+                // Boss collision
+                if (boss && bi < playerBullets.length) {
+                    const b = playerBullets[bi];
+                    if (b && Math.abs(b.x - boss.x) < boss.width/2 &&
+                        Math.abs(b.y - boss.y) < boss.height/2) {
+                        boss.health -= b.damage;
+                        playerBullets.splice(bi, 1);
+                        
+                        // Boss damage effects - sparkles + occasional explosion
+                        spawnHitSparkles(b.x, b.y, b.color);
+                        if (Math.random() < 0.3) {
+                            spawnBossExplosion(b.x, b.y);
+                        }
+                        
+                        if (boss.health <= 0) {
+                            score += boss.points;
+                            // Big death explosion
+                            for (let i = 0; i < 5; i++) {
+                                setTimeout(() => {
+                                    if (!boss) return;
+                                    spawnBossExplosion(
+                                        boss.x + (Math.random() - 0.5) * 60,
+                                        boss.y + (Math.random() - 0.5) * 40
+                                    );
+                                }, i * 100);
+                            }
+                            spawnParticles(boss.x, boss.y, '#ff0');
+                            
+                            // Check if this was a main boss - increase game speed
+                            if (boss.type === 'mainboss') {
+                                gameSpeed += 0.1; // 10% faster
+                                showNotification('SPEED UP! ' + Math.round(gameSpeed * 100) + '%', '#ff6600');
+                            }
+                            
+                            boss = null;
+                            bossActive = false;
+                            
+                            // Progress to next wave
+                            wave++;
+                            if (wave > TOTAL_WAVES) {
+                                showVictory();
+                            } else {
+                                // Show boss defeat message
+                                if ([...MINI_BOSS_WAVES, ...MAIN_BOSS_WAVES].includes(wave - 1)) {
+                                    showNotification(getBossDefeatMessage(wave - 1), '#00ff00');
+                                }
+                                updateUI();
+                                waveTransitioning = true;
+                                setTimeout(() => initWave(wave), 1500);
+                            }
+                        }
+                        updateUI();
+                    }
+                }
+            }
+            
+            // Collision: Player bullets → Enemy bubbles (shoot through!)
+            for (let bi = playerBullets.length - 1; bi >= 0; bi--) {
+                const bullet = playerBullets[bi];
+                for (let ei = enemyBullets.length - 1; ei >= 0; ei--) {
+                    const enemyBullet = enemyBullets[ei];
+                    if (enemyBullet.isBubble) {
+                        const size = enemyBullet.size || 10;
+                        if (Math.abs(bullet.x - enemyBullet.x) < size + 5 &&
+                            Math.abs(bullet.y - enemyBullet.y) < size + 5) {
+                            // Pop the bubble!
+                            spawnHitSparkles(enemyBullet.x, enemyBullet.y, '#ff6600');
+                            spawnParticles(enemyBullet.x, enemyBullet.y, '#ff8800');
+                            enemyBullets.splice(ei, 1);
+                            score += 5; // Small score bonus
+                            // Bullet passes through! Don't remove it
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Collision: Enemy bullets → Player
+            for (let bi = enemyBullets.length - 1; bi >= 0; bi--) {
+                const bullet = enemyBullets[bi];
+                const hitSize = bullet.isBubble ? (bullet.size || 10) + 6 : 10; // Even smaller hitbox
+                
+                if (Math.abs(bullet.x - player.x) < hitSize &&
+                    Math.abs(bullet.y - player.y) < hitSize) {
+                    enemyBullets.splice(bi, 1);
+                    loseLife();
+                }
+            }
+            
+            // Check if enemies reached bottom
+            enemies.forEach(enemy => {
+                if (enemy.y > canvas.height - 60) {
+                    loseLife();
+                    enemy.y = 60;
+                }
+            });
+            
+            // Wave complete (only if not already transitioning)
+            if (enemies.length === 0 && !bossActive && !waveTransitioning) {
+                wave++;
+                if (wave > TOTAL_WAVES) {
+                    // Beat all 4 main bosses!
+                    showVictory();
+                } else {
+                    updateUI();
+                    initWave(wave);
+                }
+            }
+        }
+        
+        function draw() {
+            // Clear
+            ctx.fillStyle = '#050510';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Stars
+            drawStars();
+            
+            if (!gameStarted) return;
+            
+            // Enemies
+            enemies.forEach(enemy => {
+                if (enemy.type === PAWN) drawPawn(enemy.x, enemy.y);
+                else if (enemy.type === BUBBLE_SHOOTER) drawBubbleShooter(enemy.x, enemy.y);
+                else if (enemy.type === BOUNCER) drawBouncer(enemy.x, enemy.y, enemy);
+                else if (enemy.type === CHARGER) drawCharger(enemy.x, enemy.y, enemy);
+                else if (enemy.type === 'miniboss2') {
+                    // Draw second mini-boss like the main mini-boss
+                    drawMiniBoss(enemy);
+                }
+                else drawKnight(enemy.x, enemy.y);
+                
+                // Power-up indicator
+                if (enemy.hasPowerUp) {
+                    ctx.fillStyle = '#ffd700';
+                    ctx.beginPath();
+                    ctx.arc(enemy.x, enemy.y - enemy.height, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Health bar for high-HP enemies (Bouncers, Chargers)
+                if ((enemy.type === BOUNCER || enemy.type === CHARGER) && enemy.health > 0) {
+                    const maxHp = enemy.type === BOUNCER ? 15 : 12;
+                    const barWidth = 24;
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(enemy.x - barWidth/2, enemy.y - 20, barWidth, 4);
+                    ctx.fillStyle = enemy.health > maxHp * 0.3 ? '#0f0' : '#f00';
+                    ctx.fillRect(enemy.x - barWidth/2, enemy.y - 20, barWidth * (enemy.health / maxHp), 4);
+                }
+            });
+            
+            // Boss
+            if (boss) drawBoss();
+            
+            // Player
+            drawPlayer();
+            
+            // Shields around player
+            drawShields();
+            
+            // Bullets
+            drawBullets();
+            
+            // Power-ups
+            drawPowerUps();
+            
+            // Particles
+            drawParticles();
+            
+            // Notifications
+            drawNotifications();
+            
+            // Boss wave indicator
+            if (MINI_BOSS_WAVES.includes(wave) && bossActive) {
+                const isDouble = DOUBLE_MINI_WAVES.includes(wave);
+                ctx.fillStyle = '#e8707e';
+                ctx.font = '12px "Space Mono", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(isDouble ? '⚔ TWIN HORSE KINGS ⚔' : '⚔ THE HORSE KING ⚔', canvas.width / 2, 25);
+            } else if (MAIN_BOSS_WAVES.includes(wave) && bossActive) {
+                const bossIndex = MAIN_BOSS_WAVES.indexOf(wave);
+                const bossNames = ['STANDING STALLION', 'GALLOPING FURY', 'BABY TERROR', 'BASKETBALL BEAST'];
+                ctx.fillStyle = '#ffaa00';
+                ctx.font = '12px "Space Mono", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('⚔ ' + bossNames[bossIndex] + ' ⚔', canvas.width / 2, 25);
+            }
+        }
+        
+        // ═══════════════════════════════════════
+        // GAME LOOP
+        // ═══════════════════════════════════════
+        function gameLoop(timestamp) {
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            update(deltaTime || 16);
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // ═══════════════════════════════════════
+        // GAME FLOW
+        // ═══════════════════════════════════════
+        function loseLife() {
+            // Use shield first if available
+            if (shields > 0) {
+                shields--;
+                showNotification('SHIELD LOST!', '#00aaff');
+                spawnParticles(player.x, player.y, '#00aaff');
+                updateUI();
+                return;
+            }
+            
+            lives--;
+            updateUI();
+            spawnParticles(player.x, player.y, '#e8707e');
+            
+            if (lives <= 0) {
+                showGameOver();
+            } else {
+                showNotification('OUCH! ' + lives + ' LEFT', '#ff4444');
+            }
+        }
+        
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            
+            // Show wave or boss number based on new structure
+            // Mini-boss waves: 5, 11, 15, 19 (15 & 19 are double)
+            // Main boss waves: 8, 12, 16, 20
+            if (wave === 5 || wave === 11) {
+                document.getElementById('wave').textContent = 'MINI';
+            } else if (wave === 15 || wave === 19) {
+                document.getElementById('wave').textContent = '2xMINI';
+            } else if (wave === 8) {
+                document.getElementById('wave').textContent = 'BOSS 1';
+            } else if (wave === 12) {
+                document.getElementById('wave').textContent = 'BOSS 2';
+            } else if (wave === 16) {
+                document.getElementById('wave').textContent = 'BOSS 3';
+            } else if (wave === 20) {
+                document.getElementById('wave').textContent = 'FINAL';
+            } else {
+                document.getElementById('wave').textContent = wave + '/' + TOTAL_WAVES;
+            }
+            
+            // Show hearts for lives (max display 10)
+            const maxDisplay = 10;
+            const livesDisplay = document.getElementById('livesDisplay');
+            let heartsHTML = '';
+            for (let i = 0; i < Math.min(lives, maxDisplay); i++) {
+                heartsHTML += '♥';
+            }
+            if (lives > maxDisplay) {
+                heartsHTML += '+' + (lives - maxDisplay);
+            }
+            livesDisplay.innerHTML = heartsHTML;
+            
+            document.getElementById('weaponDisplay').textContent = currentWeapon + ' LV.' + getWeaponLevel();
+        }
+        
+        function showGameOver() {
+            gameOver = true;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+        }
+        
+        function showVictory() {
+            victory = true;
+            document.getElementById('victoryScore').textContent = score;
+            document.getElementById('victoryScreen').classList.remove('hidden');
+        }
+        
+        function restartGame() {
+            gameStarted = true;
+            gameOver = false;
+            victory = false;
+            waveTransitioning = false;
+            score = 0;
+            lives = 5;
+            wave = 1;
+            gameSpeed = 1.0; // Reset game speed
+            mainBossLevel = 0;
+            currentWeapon = 'BEAM';
+            weaponLevels = { BEAM: 1, LASER: 1, SPREAD: 1, HOMING: 1 };
+            specialAttacks = 3;
+            shields = 0;
+            player.x = 200;
+            playerBullets = [];
+            enemyBullets = [];
+            powerUps = [];
+            particles = [];
+            notifications = [];
+            
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('victoryScreen').classList.add('hidden');
+            document.getElementById('specialCount').textContent = '×3';
+            document.getElementById('specialBtn').disabled = false;
+            
+            updateUI();
+            updateWeaponButton();
+            initWave(1);
+        }
+        
+        function startGame() {
+            if (gameStarted) return;
+            document.getElementById('startScreen').classList.add('hidden');
+            gameStarted = true;
+            lives = 5;  // Start with 5 lives
+            initWave(1);
+            updateUI();
+            updateWeaponButton();
+        }
+        
+        // ═══════════════════════════════════════
+        // INPUT HANDLERS
+        // ═══════════════════════════════════════
+        
+        // Keyboard
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (!gameStarted) startGame();
+                else keys.special = true;
+            }
+            // Weapon switching with 1-4 keys
+            if (e.code === 'Digit1') { currentWeapon = 'BEAM'; updateUI(); showNotification('BEAM LV.' + weaponLevels.BEAM, '#00ffff'); }
+            if (e.code === 'Digit2') { currentWeapon = 'LASER'; updateUI(); showNotification('LASER LV.' + weaponLevels.LASER, '#ff00ff'); }
+            if (e.code === 'Digit3') { currentWeapon = 'SPREAD'; updateUI(); showNotification('SPREAD LV.' + weaponLevels.SPREAD, '#ffff00'); }
+            if (e.code === 'Digit4') { currentWeapon = 'HOMING'; updateUI(); showNotification('HOMING LV.' + weaponLevels.HOMING, '#00ff00'); }
+            // Q/E to cycle weapons
+            if (e.code === 'KeyQ') switchWeapon(-1);
+            if (e.code === 'KeyE') switchWeapon(1);
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+        });
+        
+        // Start screen tap
+        document.getElementById('startScreen').addEventListener('click', startGame);
+        document.getElementById('startScreen').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startGame();
+        });
+        
+        // Mobile buttons
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+        const specialBtn = document.getElementById('specialBtn');
+        
+        // Left button
+        leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keys.left = true; leftBtn.classList.add('active'); });
+        leftBtn.addEventListener('touchend', () => { keys.left = false; leftBtn.classList.remove('active'); });
+        leftBtn.addEventListener('touchcancel', () => { keys.left = false; leftBtn.classList.remove('active'); });
+        leftBtn.addEventListener('mousedown', () => { keys.left = true; });
+        leftBtn.addEventListener('mouseup', () => { keys.left = false; });
+        leftBtn.addEventListener('mouseleave', () => { keys.left = false; });
+        
+        // Right button
+        rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keys.right = true; rightBtn.classList.add('active'); });
+        rightBtn.addEventListener('touchend', () => { keys.right = false; rightBtn.classList.remove('active'); });
+        rightBtn.addEventListener('touchcancel', () => { keys.right = false; rightBtn.classList.remove('active'); });
+        rightBtn.addEventListener('mousedown', () => { keys.right = true; });
+        rightBtn.addEventListener('mouseup', () => { keys.right = false; });
+        rightBtn.addEventListener('mouseleave', () => { keys.right = false; });
+        
+        // Special button
+        specialBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keys.special = true; });
+        specialBtn.addEventListener('click', () => { keys.special = true; });
+        
+        // Side weapon switch buttons
+        const weaponBtnLeft = document.getElementById('weaponBtnLeft');
+        const weaponBtnRight = document.getElementById('weaponBtnRight');
+        
+        weaponBtnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); switchWeapon(-1); });
+        weaponBtnLeft.addEventListener('click', () => { switchWeapon(-1); });
+        
+        weaponBtnRight.addEventListener('touchstart', (e) => { e.preventDefault(); switchWeapon(1); });
+        weaponBtnRight.addEventListener('click', () => { switchWeapon(1); });
+        
+        // Prevent scrolling
+        document.body.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+        
+        // Start game loop
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
